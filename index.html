@@ -42,7 +42,7 @@
         <button type="button" onclick="openForm()" class="bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl transition transform active:scale-95">+</button>
     </div>
 
-    <!-- Modal Form -->
+    <!-- Modal Form (Add / Edit) -->
     <div id="survey-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-xl">
             <div class="flex justify-between items-center border-b pb-3">
@@ -84,13 +84,15 @@
                         <input type="number" id="packageSize" step="any" placeholder="เช่น 150 หรือ 12" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="calculateUnit()">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-700 mb-1">หน่วย</label>
-                        <select id="packageUnit" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" onchange="calculateUnit()">
+                        <label class="block font-medium text-slate-700 mb-1">หน่วย (เลือกหรือพิมพ์เอง)</label>
+                        <select id="packageUnitSelect" class="w-full border border-slate-300 rounded-lg px-2 py-2 outline-none focus:border-blue-500 mb-1" onchange="handleUnitChange()">
                             <option value="กรัม">กรัม (g)</option>
                             <option value="มิลลิลิตร">มิลลิลิตร (ml)</option>
                             <option value="ชิ้น">ชิ้น (pcs)</option>
                             <option value="แพ็ค">แพ็ค</option>
+                            <option value="custom">-- พิมพ์ระบุเอง --</option>
                         </select>
+                        <input type="text" id="packageUnitCustom" placeholder="พิมพ์หน่วยเอง..." class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500 hidden" oninput="calculateUnit()">
                     </div>
                 </div>
 
@@ -100,15 +102,29 @@
                 </div>
 
                 <div>
-                    <label class="block font-medium text-slate-700 mb-1">รูปถ่ายสินค้า / ป้ายราคา</label>
-                    <input type="file" id="itemPhoto" accept="image/*" capture="environment" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="previewImage(event)">
-                    <div id="photo-preview-container" class="mt-2 hidden">
-                        <img id="photo-preview" alt="พรีวิวรูป" class="w-full h-32 object-cover rounded-lg border">
+                    <label class="block font-medium text-slate-700 mb-1">รูปถ่ายสินค้า / ป้ายราคา (เพิ่มได้สูงสุด 5 รูป)</label>
+                    <input type="file" id="itemPhoto" accept="image/*" multiple class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="previewImages(event)">
+                    <div id="photo-preview-grid" class="mt-2 grid grid-cols-5 gap-2 hidden">
+                        <!-- Preview thumbnails -->
                     </div>
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition">บันทึกข้อมูลเข้า Cloud</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Detail (View Full Info) -->
+    <div id="detail-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h2 class="font-bold text-lg text-slate-800">รายละเอียดข้อมูลสำรวจ</h2>
+                <button type="button" onclick="closeDetail()" class="text-slate-400 hover:text-slate-600 font-bold text-xl p-1">✕</button>
+            </div>
+            <div id="detail-content" class="space-y-3 text-sm">
+                <!-- Details injected here -->
+            </div>
+            <button type="button" onclick="closeDetail()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg text-sm transition">ปิด</button>
         </div>
     </div>
 
@@ -153,9 +169,8 @@
         let db = null;
         let unsubscribe = null;
         window.surveyItems = [];
-        window.currentPhotoBase64 = "";
+        window.currentPhotos = [];
 
-        // UI Functions assigned to window
         window.openSettings = function() {
             const config = JSON.parse(localStorage.getItem('fb_config') || '{}');
             document.getElementById('cfg-apiKey').value = config.apiKey || 'AIzaSyDBH18QRTobEg-G4iIVJPAMpcBVhkKeidY';
@@ -174,7 +189,6 @@
                 apiKey: document.getElementById('cfg-apiKey').value.trim(),
                 authDomain: document.getElementById('cfg-authDomain').value.trim(),
                 projectId: document.getElementById('cfg-projectId').value.trim(),
-                storageBucket: document.getElementById('cfg-projectId').value.trim() + ".appspot.com",
                 appId: document.getElementById('cfg-appId').value.trim()
             };
             localStorage.setItem('fb_config', JSON.stringify(config));
@@ -185,19 +199,69 @@
         window.openForm = function() {
             document.getElementById('survey-modal').classList.remove('hidden');
             document.getElementById('survey-form').reset();
-            document.getElementById('photo-preview-container').classList.add('hidden');
-            window.currentPhotoBase64 = "";
+            document.getElementById('packageUnitCustom').classList.add('hidden');
+            document.getElementById('photo-preview-grid').classList.add('hidden');
+            document.getElementById('photo-preview-grid').innerHTML = '';
+            window.currentPhotos = [];
         };
 
         window.closeForm = function() {
             document.getElementById('survey-modal').classList.add('hidden');
         };
 
+        window.openDetail = function(id) {
+            const item = window.surveyItems.find(i => i.id === id);
+            if (!item) return;
+
+            const unitText = item.packageSize ? `${item.packageSize} ${item.packageUnit || ''}` : '-';
+            const regPrice = item.regularPrice ? `${item.regularPrice} บาท` : '-';
+            const promoPrice = item.promoPrice ? `${item.promoPrice} บาท` : '-';
+            
+            let photosHtml = '<div class="text-xs text-slate-400">ไม่มีรูปภาพ</div>';
+            if (item.photos && item.photos.length > 0) {
+                photosHtml = `<div class="grid grid-cols-2 gap-2">${item.photos.map(p => `<img src="${p}" class="w-full h-32 object-cover rounded-lg border">`).join('')}</div>`;
+            }
+
+            document.getElementById('detail-content').innerHTML = `
+                <div class="space-y-2">
+                    <p><strong>สถานที่:</strong> ${item.storeName}</p>
+                    <p><strong>แบรนด์:</strong> ${item.brand}</p>
+                    <p><strong>ประเภท/รสชาติ:</strong> ${item.category || '-'}</p>
+                    <p><strong>ราคาปกติ:</strong> ${regPrice}</p>
+                    <p><strong>ราคาโปรโมชั่น:</strong> ${promoPrice}</p>
+                    <p><strong>ขนาดบรรจุ:</strong> ${unitText}</p>
+                    <p><strong>วันที่บันทึก:</strong> ${new Date(item.timestamp).toLocaleString()}</p>
+                    <div><strong>รูปภาพสินค้า (${item.photos ? item.photos.length : 0} รูป):</strong></div>
+                    ${photosHtml}
+                </div>
+            `;
+            document.getElementById('detail-modal').classList.remove('hidden');
+        };
+
+        window.closeDetail = function() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        };
+
+        window.handleUnitChange = function() {
+            const select = document.getElementById('packageUnitSelect');
+            const customInput = document.getElementById('packageUnitCustom');
+            if (select.value === 'custom') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+                customInput.value = '';
+            }
+            window.calculateUnit();
+        };
+
         window.calculateUnit = function() {
             const reg = parseFloat(document.getElementById('regularPrice').value) || 0;
             const promo = parseFloat(document.getElementById('promoPrice').value) || 0;
             const size = parseFloat(document.getElementById('packageSize').value) || 0;
-            const unit = document.getElementById('packageUnit').value;
+            
+            const selectVal = document.getElementById('packageUnitSelect').value;
+            const unit = selectVal === 'custom' ? document.getElementById('packageUnitCustom').value : selectVal;
 
             let finalPrice = promo > 0 ? promo : reg;
             let discount = (reg > 0 && promo > 0 && promo < reg) ? Math.round(((reg - promo) / reg) * 100) : 0;
@@ -206,15 +270,22 @@
 
             if (finalPrice > 0 && size > 0) {
                 let unitPrice = finalPrice / size;
-                document.getElementById('calc-unitprice').innerText = `ราคาเฉลี่ย: ${unitPrice.toFixed(2)} / ${unit}`;
+                document.getElementById('calc-unitprice').innerText = `ราคาเฉลี่ย: ${unitPrice.toFixed(2)} / ${unit || 'หน่วย'}`;
             } else {
                 document.getElementById('calc-unitprice').innerText = `ราคาเฉลี่ย: -`;
             }
         };
 
-        window.previewImage = function(event) {
-            const file = event.target.files[0];
-            if (file) {
+        window.previewImages = function(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            if (window.currentPhotos.length + files.length > 5) {
+                alert("สามารถเพิ่มรูปภาพได้สูงสุดไม่เกิน 5 รูปครับ");
+                return;
+            }
+
+            files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = new Image();
@@ -235,14 +306,35 @@
                         canvas.width = width;
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
-                        window.currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        const resizedBase64 = canvas.toDataURL('image/jpeg', 0.7);
 
-                        document.getElementById('photo-preview').src = window.currentPhotoBase64;
-                        document.getElementById('photo-preview-container').classList.remove('hidden');
+                        window.currentPhotos.push(resizedBase64);
+                        renderPhotoPreviews();
                     }
                 }
                 reader.readAsDataURL(file);
+            });
+        };
+
+        function renderPhotoPreviews() {
+            const container = document.getElementById('photo-preview-grid');
+            if (window.currentPhotos.length > 0) {
+                container.classList.remove('hidden');
+                container.innerHTML = window.currentPhotos.map((photo, index) => `
+                    <div class="relative w-full h-16 border rounded-lg overflow-hidden bg-slate-100">
+                        <img src="${photo}" class="w-full h-full object-cover">
+                        <button type="button" onclick="removePhoto(${index})" class="absolute top-0 right-0 bg-red-600 text-white w-5 h-5 flex items-center justify-center text-xs font-bold rounded-bl">×</button>
+                    </div>
+                `).join('');
+            } else {
+                container.classList.add('hidden');
+                container.innerHTML = '';
             }
+        }
+
+        window.removePhoto = function(index) {
+            window.currentPhotos.splice(index, 1);
+            renderPhotoPreviews();
         };
 
         window.renderItems = function() {
@@ -263,20 +355,26 @@
 
             listEl.innerHTML = filtered.map(item => {
                 const priceToShow = item.promoPrice ? item.promoPrice : item.regularPrice;
+                const thumbImg = (item.photos && item.photos.length > 0) ? item.photos[0] : '';
+                const photoCount = item.photos ? item.photos.length : 0;
                 return `
-                    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex gap-3 items-center">
-                        <div class="w-20 h-20 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden border">
-                            ${item.photo ? `<img src="${item.photo}" class="w-full h-full object-cover">` : `<div class="flex items-center justify-center h-full text-xs text-slate-400">ไม่มีรูป</div>`}
+                    <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex gap-3 items-center cursor-pointer hover:border-blue-400 transition">
+                        <div class="w-20 h-20 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden border relative">
+                            ${thumbImg ? `<img src="${thumbImg}" class="w-full h-full object-cover">` : `<div class="flex items-center justify-center h-full text-xs text-slate-400">ไม่มีรูป</div>`}
+                            ${photoCount > 1 ? `<span class="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1 rounded">📷 ${photoCount}</span>` : ''}
                         </div>
                         <div class="flex-grow min-w-0">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 truncate">${item.brand}</h3>
-                                <button type="button" onclick="deleteItemFromCloud('${item.id}')" class="text-slate-300 hover:text-red-500 text-xs px-1">🗑️</button>
+                                <button type="button" onclick="event.stopPropagation(); deleteItemFromCloud('${item.id}')" class="text-slate-300 hover:text-red-500 text-xs px-1">🗑️</button>
                             </div>
                             <p class="text-xs text-slate-500 truncate">📍 ${item.storeName} | ${item.category || '-'}</p>
-                            <div class="mt-1 flex items-baseline gap-2">
-                                <span class="font-bold text-blue-600 text-sm">${priceToShow}</span>
-                                ${item.promoPrice && item.regularPrice ? `<span class="text-xs text-slate-400 line-through">${item.regularPrice}</span>` : ''}
+                            <div class="mt-1 flex items-baseline justify-between">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="font-bold text-blue-600 text-sm">${priceToShow} ฿</span>
+                                    ${item.promoPrice && item.regularPrice ? `<span class="text-xs text-slate-400 line-through">${item.regularPrice} ฿</span>` : ''}
+                                </div>
+                                <span class="text-[11px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded">แตะดูรายละเอียด</span>
                             </div>
                         </div>
                     </div>
@@ -290,9 +388,9 @@
                 alert("ยังไม่มีข้อมูลสำหรับ Export");
                 return;
             }
-            let csvContent = "\uFEFFสถานที่,แบรนด์,ประเภท,ราคาปกติ,ราคาโปรโมชั่น,ขนาดบรรจุ,หน่วย,วันที่\n";
+            let csvContent = "\uFEFFสถานที่,แบรนด์,ประเภท,ราคาปกติ,ราคาโปรโมชั่น,ขนาดบรรจุ,หน่วย,จำนวนรูป,วันที่\n";
             items.forEach(i => {
-                csvContent += `"${i.storeName}","${i.brand}","${i.category || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${i.timestamp}"\n`;
+                csvContent += `"${i.storeName}","${i.brand}","${i.category || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${i.photos ? i.photos.length : 0}","${i.timestamp}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -345,6 +443,10 @@
                 window.openSettings();
                 return;
             }
+
+            const selectVal = document.getElementById('packageUnitSelect').value;
+            const finalUnit = selectVal === 'custom' ? document.getElementById('packageUnitCustom').value.trim() : selectVal;
+
             const item = {
                 storeName: document.getElementById('storeName').value,
                 brand: document.getElementById('brand').value,
@@ -352,16 +454,15 @@
                 regularPrice: document.getElementById('regularPrice').value,
                 promoPrice: document.getElementById('promoPrice').value,
                 packageSize: document.getElementById('packageSize').value,
-                packageUnit: document.getElementById('packageUnit').value,
-                photo: window.currentPhotoBase64 || '',
+                packageUnit: finalUnit,
+                photos: window.currentPhotos || [],
                 timestamp: new Date().toISOString()
             };
             try {
                 await addDoc(collection(db, "surveys"), item);
                 window.closeForm();
                 document.getElementById('survey-form').reset();
-                document.getElementById('photo-preview-container').classList.add('hidden');
-                window.currentPhotoBase64 = "";
+                window.currentPhotos = [];
             } catch (e) {
                 alert("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
             }
