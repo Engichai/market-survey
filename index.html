@@ -40,16 +40,31 @@
     <!-- Main Container -->
     <main class="max-w-md mx-auto p-4 space-y-4">
         
-        <!-- Search & Filter Bar -->
-        <div class="flex gap-2 items-center">
-            <div class="relative w-full">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </span>
-                <input type="text" id="search-box" placeholder="Search product, store..." class="w-full bg-white text-sm text-slate-800 placeholder-slate-400 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 outline-none focus:border-amber-400 shadow-sm transition" oninput="renderItems()">
+        <!-- Search Bar -->
+        <div class="relative w-full">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </span>
+            <input type="text" id="search-box" placeholder="Search product, store..." class="w-full bg-white text-sm text-slate-800 placeholder-slate-400 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 outline-none focus:border-amber-400 shadow-sm transition" oninput="renderItems()">
+        </div>
+
+        <!-- Sort By & Action Buttons Bar -->
+        <div class="flex gap-2 items-center justify-between">
+            <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-2 rounded-2xl shadow-sm text-xs w-full">
+                <span class="text-slate-400 font-medium whitespace-nowrap">Sort:</span>
+                <select id="sort-select" onchange="renderItems()" class="bg-transparent font-semibold text-slate-700 outline-none w-full cursor-pointer">
+                    <option value="productName">📦 Product Name (A-Z)</option>
+                    <option value="brand">🏷️ Brand Name (A-Z)</option>
+                    <option value="storeName">📍 Store / Location</option>
+                    <option value="packageSize">⚖️ Package Size</option>
+                    <option value="timestamp">📅 Date (Newest)</option>
+                </select>
             </div>
-            <button type="button" onclick="exportCSV()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 px-4 py-3 rounded-2xl font-semibold text-xs transition shadow-sm flex-shrink-0 flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+
+            <button type="button" onclick="openCompareModal()" id="btn-compare-tab" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2.5 rounded-2xl font-semibold text-xs transition shadow-sm flex-shrink-0 flex items-center gap-1">
+                ⚖️ (<span id="compare-count">0</span>)
+            </button>
+            <button type="button" onclick="exportCSV()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 px-3 py-2.5 rounded-2xl font-semibold text-xs transition shadow-sm flex-shrink-0">
                 Export
             </button>
         </div>
@@ -64,37 +79,32 @@
 
     </main>
 
-    <!-- Bottom Navigation Bar (Modern SVG Icons) -->
+    <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-100 z-30 max-w-md mx-auto px-6 py-2.5 flex justify-between items-center shadow-lg">
-        <!-- Home -->
-        <button onclick="filterByCategory(null)" class="flex flex-col items-center text-amber-500 gap-1 group transition">
+        <button onclick="filterByCategory(null)" class="flex flex-col items-center text-amber-500 gap-1 transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
             <span class="text-[10px] font-bold">Home</span>
         </button>
-        <!-- Category -->
         <button onclick="openCategoryModal()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-1 transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             <span class="text-[10px] font-medium" id="nav-cat">Category</span>
         </button>
-        <!-- Center Floating Action Button -->
         <div class="relative -top-5">
             <button type="button" onclick="openForm()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-14 h-14 rounded-full shadow-xl shadow-amber-400/30 flex items-center justify-center transition transform active:scale-90">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             </button>
         </div>
-        <!-- Export / Stats -->
         <button onclick="exportCSV()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-1 transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             <span class="text-[10px] font-medium">Export</span>
         </button>
-        <!-- Settings -->
         <button onclick="openSettings()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-1 transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             <span class="text-[10px] font-medium">Settings</span>
         </button>
     </nav>
 
-    <!-- Datalists for Autocomplete -->
+    <!-- Datalists -->
     <datalist id="store-list"></datalist>
     <datalist id="brand-list"></datalist>
     <datalist id="product-list"></datalist>
@@ -183,7 +193,7 @@
                 </div>
 
                 <div>
-                    <label id="lbl-photos" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Photos (Max 5)</label>
+                    <label id="lbl-photos" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Photos (Unlimited)</label>
                     <input type="file" id="itemPhoto" accept="image/*" multiple class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" onchange="previewImages(event)">
                     <div id="photo-preview-grid" class="mt-2 grid grid-cols-5 gap-2 hidden"></div>
                 </div>
@@ -205,6 +215,18 @@
         </div>
     </div>
 
+    <!-- Modal Compare -->
+    <div id="compare-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-3xl max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h2 id="compare-modal-title" class="font-bold text-lg text-slate-900">Product Comparison</h2>
+                <button type="button" onclick="closeCompareModal()" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">✕</button>
+            </div>
+            <div id="compare-content" class="overflow-x-auto"></div>
+            <button type="button" onclick="closeCompareModal()" id="btn-close-compare" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-sm transition">Close</button>
+        </div>
+    </div>
+
     <!-- Modal Detail -->
     <div id="detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl">
@@ -223,7 +245,7 @@
     <!-- Fullscreen Image Viewer Modal -->
     <div id="image-viewer-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-2" onclick="closeImageViewer()">
         <button type="button" onclick="closeImageViewer()" class="absolute top-5 right-5 text-white text-3xl font-bold bg-black/50 w-10 h-10 rounded-full flex items-center justify-center">✕</button>
-        <img id="fullscreen-img" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl transition transform scale-100">
+        <img id="fullscreen-img" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl">
     </div>
 
     <!-- Modal Settings -->
@@ -268,8 +290,26 @@
         let unsubscribe = null;
         window.surveyItems = [];
         window.currentPhotos = [];
+        window.compareList = [];
         window.currentLang = localStorage.getItem('app_lang') || 'th';
         window.selectedCategoryFilter = null;
+
+        const translations = {
+            "อาหาร": { th: "อาหาร", en: "Food", id: "Makanan" },
+            "เครื่องดื่ม": { th: "เครื่องดื่ม", en: "Beverage", id: "Minuman" },
+            "อุปกรณ์ไฟฟ้า": { th: "อุปกรณ์ไฟฟ้า", en: "Electronics", id: "Elektronik" },
+            "ห้องครัว": { th: "ห้องครัว", en: "Kitchen", id: "Dapur" },
+            "Meat": { th: "เนื้อสัตว์", en: "Meat", id: "Daging" },
+            "Medicine": { th: "ยา", en: "Medicine", id: "Obat" }
+        };
+
+        window.translateCategory = function(cat) {
+            if (!cat) return '-';
+            if (translations[cat]) {
+                return translations[cat][window.currentLang] || cat;
+            }
+            return cat;
+        };
 
         const i18n = {
             th: {
@@ -291,7 +331,7 @@
                 pkgSize: "ขนาดบรรจุ",
                 pkgUnit: "หน่วย",
                 note: "หมายเหตุ / Note",
-                photos: "รูปภาพสินค้า (สูงสุด 5 รูป)",
+                photos: "รูปภาพสินค้า (ไม่จำกัด)",
                 saveBtn: "บันทึกข้อมูล",
                 detailTitle: "รายละเอียดสินค้า",
                 closeBtn: "ปิด",
@@ -303,6 +343,8 @@
                 catModalTitle: "หมวดหมู่ทั้งหมด",
                 allCategories: "📁 ทั้งหมด (All Items)",
                 itemsCount: "รายการ",
+                compareTitle: "เปรียบเทียบสินค้า",
+                compareBtn: "เปรียบเทียบ",
                 storePlaceholder: "เช่น Lotus Pluit",
                 brandPlaceholder: "ชื่อแบรนด์",
                 productPlaceholder: "ชื่อสินค้า / รุ่น",
@@ -330,7 +372,7 @@
                 pkgSize: "Package Size",
                 pkgUnit: "Unit",
                 note: "Note / Remarks",
-                photos: "Photos (Max 5)",
+                photos: "Photos (Unlimited)",
                 saveBtn: "Save Item",
                 detailTitle: "Survey Details",
                 closeBtn: "Close",
@@ -342,6 +384,8 @@
                 catModalTitle: "All Categories",
                 allCategories: "📁 All Items",
                 itemsCount: "items",
+                compareTitle: "Product Comparison",
+                compareBtn: "Compare",
                 storePlaceholder: "e.g., Lotus Pluit",
                 brandPlaceholder: "Brand name",
                 productPlaceholder: "Product name",
@@ -369,7 +413,7 @@
                 pkgSize: "Ukuran Kemasan",
                 pkgUnit: "Satuan",
                 note: "Catatan",
-                photos: "Foto (Maks 5)",
+                photos: "Foto (Tidak Terbatas)",
                 saveBtn: "Simpan Data",
                 detailTitle: "Detail Survei",
                 closeBtn: "Tutup",
@@ -381,6 +425,8 @@
                 catModalTitle: "Semua Kategori",
                 allCategories: "📁 Semua Item",
                 itemsCount: "item",
+                compareTitle: "Perbandingan Produk",
+                compareBtn: "Bandingkan",
                 storePlaceholder: "cth: Lotus Pluit",
                 brandPlaceholder: "Nama merek",
                 productPlaceholder: "Nama produk",
@@ -422,6 +468,8 @@
             document.getElementById('btn-edit-item').innerText = t.editBtn;
             document.getElementById('cat-modal-title').innerText = t.catModalTitle;
             document.getElementById('btn-close-cat').innerText = t.closeBtn;
+            document.getElementById('compare-modal-title').innerText = t.compareTitle;
+            document.getElementById('btn-close-compare').innerText = t.closeBtn;
 
             document.getElementById('storeName').placeholder = t.storePlaceholder;
             document.getElementById('brand').placeholder = t.brandPlaceholder;
@@ -482,7 +530,7 @@
                 document.getElementById('productName').value = editData.productName || '';
                 
                 const catSelect = document.getElementById('categorySelect');
-                const defaultCats = ["อาหาร", "เครื่องดื่ม", "อุปกรณ์ไฟฟ้า", "ห้องครัว"];
+                const defaultCats = ["อาหาร", "เครื่องดื่ม", "อุปกรณ์ไฟฟ้า", "ห้องครัว", "Meat", "Medicine"];
                 if (defaultCats.includes(editData.category)) {
                     catSelect.value = editData.category;
                 } else {
@@ -540,16 +588,23 @@
 
             let html = `
                 <div onclick="filterByCategory(null)" class="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl cursor-pointer hover:bg-amber-100 flex justify-between items-center font-semibold text-amber-900 transition">
-                    <span>${t.allCategories}</span>
+                    <div class="flex items-center gap-2.5">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                        <span>${t.allCategories}</span>
+                    </div>
                     <span class="text-xs bg-amber-200 px-2.5 py-1 rounded-full">${items.length} ${t.itemsCount}</span>
                 </div>
             `;
 
             Object.keys(catMap).sort().forEach(cat => {
                 const isSelected = window.selectedCategoryFilter === cat;
+                const translatedCatName = window.translateCategory(cat);
                 html += `
                     <div onclick="filterByCategory('${cat}')" class="p-3.5 bg-slate-50 border ${isSelected ? 'border-amber-400 bg-amber-50/50' : 'border-slate-100'} rounded-2xl cursor-pointer hover:border-amber-300 flex justify-between items-center transition">
-                        <span class="font-medium text-slate-700">📁 ${cat}</span>
+                        <div class="flex items-center gap-2.5">
+                            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                            <span class="font-medium text-slate-700">${translatedCatName}</span>
+                        </div>
                         <span class="text-xs bg-slate-200 text-slate-600 px-2.5 py-1 rounded-full">${catMap[cat]} ${t.itemsCount}</span>
                     </div>
                 `;
@@ -580,9 +635,10 @@
             `;
             cats.forEach(cat => {
                 const isSel = window.selectedCategoryFilter === cat;
+                const translatedName = window.translateCategory(cat);
                 html += `
                     <button onclick="filterByCategory('${cat}')" class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition ${isSel ? 'bg-amber-400 text-slate-900 shadow-md shadow-amber-400/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}">
-                        ${cat}
+                        ${translatedName}
                     </button>
                 `;
             });
@@ -594,6 +650,64 @@
             if (item.photo) return [item.photo];
             return [];
         }
+
+        window.toggleCompare = function(id, event) {
+            event.stopPropagation();
+            const index = window.compareList.indexOf(id);
+            if (index > -1) {
+                window.compareList.splice(index, 1);
+            } else {
+                window.compareList.push(id);
+            }
+            document.getElementById('compare-count').innerText = window.compareList.length;
+            renderItems();
+        };
+
+        window.openCompareModal = function() {
+            if (window.compareList.length === 0) {
+                alert(window.currentLang === 'th' ? "กรุณาเลือกสินค้าที่ต้องการเปรียบเทียบอย่างน้อย 1 รายการ" : "Please select at least 1 item to compare.");
+                return;
+            }
+            const container = document.getElementById('compare-content');
+            const itemsToCompare = window.surveyItems.filter(i => window.compareList.includes(i.id));
+
+            let html = `<div class="flex gap-4 overflow-x-auto pb-4">`;
+            itemsToCompare.forEach(item => {
+                const photos = getItemPhotos(item);
+                const thumb = photos.length > 0 ? photos[0] : '';
+                const regPrice = item.regularPrice ? `Rp ${parsePrice(item.regularPrice).toLocaleString('id-ID')}` : '-';
+                const promoPrice = item.promoPrice ? `Rp ${parsePrice(item.promoPrice).toLocaleString('id-ID')}` : '-';
+                const unitText = item.packageSize ? `${item.packageSize} ${item.packageUnit || ''}` : '-';
+
+                html += `
+                    <div class="min-w-[220px] max-w-[220px] bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                        <div>
+                            <div class="w-full h-28 bg-white rounded-xl overflow-hidden border mb-2">
+                                ${thumb ? `<img src="${thumb}" class="w-full h-full object-cover">` : `<div class="flex items-center justify-center h-full text-xs text-slate-400">No Photo</div>`}
+                            </div>
+                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">${window.translateCategory(item.category)}</span>
+                            <h3 class="font-bold text-slate-900 text-sm truncate mt-1">${item.productName || item.brand}</h3>
+                            <p class="text-xs text-slate-500 truncate">Brand: ${item.brand}</p>
+                            <p class="text-xs text-slate-500 truncate">Store: ${item.storeName}</p>
+                        </div>
+                        <div class="space-y-1 text-xs border-t pt-2 border-slate-200">
+                            <p><strong>Reg Price:</strong> <span class="text-blue-600 font-bold">${regPrice}</span></p>
+                            <p><strong>Promo:</strong> <span class="text-emerald-600 font-bold">${promoPrice}</span></p>
+                            <p><strong>Size:</strong> ${unitText}</p>
+                            <p><strong>Note:</strong> ${item.note || '-'}</p>
+                        </div>
+                        <button onclick="toggleCompare('${item.id}', event); openCompareModal();" class="w-full bg-red-100 text-red-600 text-xs py-1.5 rounded-xl font-semibold hover:bg-red-200 transition">Remove</button>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+            document.getElementById('compare-modal').classList.remove('hidden');
+        };
+
+        window.closeCompareModal = function() {
+            document.getElementById('compare-modal').classList.add('hidden');
+        };
 
         window.openDetail = function(id) {
             const item = window.surveyItems.find(i => i.id === id);
@@ -615,7 +729,7 @@
                     <p><strong>Store:</strong> ${item.storeName}</p>
                     <p><strong>Brand:</strong> ${item.brand}</p>
                     <p><strong>Product Name:</strong> ${item.productName || item.brand}</p>
-                    <p><strong>Category:</strong> ${item.category || '-'}</p>
+                    <p><strong>Category:</strong> ${window.translateCategory(item.category) || '-'}</p>
                     <p><strong>Regular Price:</strong> ${regPrice}</p>
                     <p><strong>Promo Price:</strong> ${promoPrice}</p>
                     <p><strong>Package Size:</strong> ${unitText}</p>
@@ -718,10 +832,6 @@
         window.previewImages = function(event) {
             const files = Array.from(event.target.files);
             if (files.length === 0) return;
-            if (window.currentPhotos.length + files.length > 5) {
-                alert("Maximum 5 photos allowed.");
-                return;
-            }
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -765,6 +875,7 @@
 
         window.renderItems = function() {
             const keyword = document.getElementById('search-box').value.toLowerCase();
+            const sortBy = document.getElementById('sort-select').value;
             const listEl = document.getElementById('survey-list');
             const items = window.surveyItems || [];
             const t = i18n[window.currentLang];
@@ -779,10 +890,21 @@
                 return matchKeyword && matchCategory;
             });
 
+            // DYNAMIC SORTING LOGIC
             filtered.sort((a, b) => {
-                const nameA = (a.productName || a.brand || '').toLowerCase();
-                const nameB = (b.productName || b.brand || '').toLowerCase();
-                return nameA.localeCompare(nameB, 'th');
+                if (sortBy === 'packageSize') {
+                    const sizeA = parseFloat(a.packageSize) || 0;
+                    const sizeB = parseFloat(b.packageSize) || 0;
+                    return sizeA - sizeB;
+                } else if (sortBy === 'timestamp') {
+                    const dateA = new Date(a.timestamp || 0);
+                    const dateB = new Date(b.timestamp || 0);
+                    return dateB - dateA; // Newest first
+                } else {
+                    const valA = (a[sortBy] || '').toLowerCase();
+                    const valB = (b[sortBy] || '').toLowerCase();
+                    return valA.localeCompare(valB, 'th');
+                }
             });
 
             if (filtered.length === 0) {
@@ -798,9 +920,15 @@
                 const photos = getItemPhotos(item);
                 const thumbImg = photos.length > 0 ? photos[0] : '';
                 const displayName = item.productName || item.brand;
+                const translatedCategory = window.translateCategory(item.category);
+                const isCompared = window.compareList.includes(item.id);
 
                 return `
-                    <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-3xl shadow-sm border border-slate-100 hover:border-amber-300 transition flex flex-col justify-between cursor-pointer relative group">
+                    <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-3xl shadow-sm border ${isCompared ? 'border-amber-400 bg-amber-50/20' : 'border-slate-100'} hover:border-amber-300 transition flex flex-col justify-between cursor-pointer relative group">
+                        <button type="button" onclick="toggleCompare('${item.id}', event)" class="absolute top-4 left-4 w-7 h-7 ${isCompared ? 'bg-amber-400 text-slate-900 font-bold' : 'bg-white/80 text-slate-400'} backdrop-blur-sm rounded-full flex items-center justify-center text-xs shadow-sm z-10 transition hover:scale-110" title="Select for comparison">
+                            ⚖️
+                        </button>
+
                         <button type="button" onclick="event.stopPropagation(); deleteItemFromCloud('${item.id}')" class="absolute top-4 right-4 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 shadow-sm z-10 transition">
                             🗑️
                         </button>
@@ -810,7 +938,7 @@
                         </div>
 
                         <div class="space-y-1">
-                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-wider">${item.category || 'General'}</span>
+                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-wider">${translatedCategory || 'General'}</span>
                             <h3 class="font-bold text-slate-900 text-sm truncate">${displayName}</h3>
                             <p class="text-[11px] text-slate-400 truncate">📍 ${item.storeName}</p>
                             
@@ -830,7 +958,7 @@
             let csvContent = "\uFEFFStore,Brand,Product Name,Category,Regular Price (Rp),Promo Price (Rp),Package Size,Unit,Note,Photos Count,Timestamp\n";
             items.forEach(i => {
                 const photos = getItemPhotos(i);
-                csvContent += `"${i.storeName}","${i.brand}","${i.productName || ''}","${i.category || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${i.note || ''}","${photos.length}","${i.timestamp}"\n`;
+                csvContent += `"${i.storeName}","${i.brand}","${i.productName || ''}","${window.translateCategory(i.category) || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${i.note || ''}","${photos.length}","${i.timestamp}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
