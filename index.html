@@ -51,19 +51,17 @@
             </button>
         </div>
 
-        <!-- Pill Category Tabs (Mock / Quick Filter) -->
-        <div id="quick-category-tabs" class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <!-- Dynamic Category Pills -->
-        </div>
+        <!-- Quick Category Tabs -->
+        <div id="quick-category-tabs" class="flex gap-2 overflow-x-auto pb-1 scrollbar-none"></div>
 
-        <!-- Survey List Grid (2 Columns Style) -->
+        <!-- Survey List Grid -->
         <div id="survey-list" class="grid grid-cols-2 gap-3">
             <div id="ui-loading" class="col-span-2 text-center py-12 text-slate-400 bg-white rounded-3xl border border-slate-100 shadow-sm">Loading...</div>
         </div>
 
     </main>
 
-    <!-- Bottom Navigation Bar (Modern App Style) -->
+    <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-100 z-30 max-w-md mx-auto px-6 py-2.5 flex justify-between items-center shadow-lg">
         <button onclick="filterByCategory(null)" class="flex flex-col items-center text-amber-500 gap-0.5">
             <span class="text-xl">🏠</span>
@@ -73,7 +71,6 @@
             <span class="text-xl">📁</span>
             <span class="text-[10px] font-medium" id="nav-cat">Category</span>
         </button>
-        <!-- Center Floating Action Button -->
         <div class="relative -top-5">
             <button type="button" onclick="openForm()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-14 h-14 rounded-full shadow-xl shadow-amber-400/30 flex items-center justify-center text-3xl font-light transition transform active:scale-90">
                 +
@@ -89,6 +86,11 @@
         </button>
     </nav>
 
+    <!-- Datalists for Autocomplete -->
+    <datalist id="store-list"></datalist>
+    <datalist id="brand-list"></datalist>
+    <datalist id="product-list"></datalist>
+
     <!-- Modal Form (Add / Edit) -->
     <div id="survey-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl">
@@ -98,19 +100,20 @@
             </div>
 
             <form id="survey-form" onsubmit="saveItem(event)" class="space-y-3.5 text-sm">
+                <input type="hidden" id="editItemId">
                 <div>
                     <label id="lbl-store" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Store / Location *</label>
-                    <input type="text" id="storeName" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
+                    <input type="text" id="storeName" list="store-list" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label id="lbl-brand" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Brand *</label>
-                        <input type="text" id="brand" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
+                        <input type="text" id="brand" list="brand-list" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
                     </div>
                     <div>
                         <label id="lbl-productname" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Product Name *</label>
-                        <input type="text" id="productName" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
+                        <input type="text" id="productName" list="product-list" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
                     </div>
                 </div>
 
@@ -123,7 +126,10 @@
                         <option value="ห้องครัว">🍳 ห้องครัว (Kitchen)</option>
                         <option value="custom">-- ✍️ ระบุเอง (Other) --</option>
                     </select>
-                    <input type="text" id="categoryCustom" placeholder="Enter category..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 hidden transition">
+                    <div id="categoryCustomContainer" class="hidden flex gap-2">
+                        <input type="text" id="categoryCustom" placeholder="Enter category..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
+                        <button type="button" onclick="confirmCustomCategory()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-4 rounded-2xl text-xs transition">OK</button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2.5">
@@ -151,7 +157,10 @@
                             <option value="แพ็ค">แพ็ค</option>
                             <option value="custom">-- พิมพ์ระบุเอง --</option>
                         </select>
-                        <input type="text" id="packageUnitCustom" placeholder="Enter unit..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 hidden transition">
+                        <div id="packageUnitCustomContainer" class="hidden flex gap-2">
+                            <input type="text" id="packageUnitCustom" placeholder="Enter unit..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition" oninput="calculateUnit()">
+                            <button type="button" onclick="confirmCustomUnit()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-4 rounded-2xl text-xs transition">OK</button>
+                        </div>
                     </div>
                 </div>
 
@@ -196,8 +205,17 @@
                 <button type="button" onclick="closeDetail()" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">✕</button>
             </div>
             <div id="detail-content" class="space-y-2.5 text-sm text-slate-700"></div>
-            <button type="button" onclick="closeDetail()" id="btn-close" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-sm transition">Close</button>
+            <div class="flex gap-2 pt-2">
+                <button type="button" id="btn-edit-item" onclick="" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold py-3 rounded-2xl text-sm transition">Edit</button>
+                <button type="button" onclick="closeDetail()" id="btn-close" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-sm transition">Close</button>
+            </div>
         </div>
+    </div>
+
+    <!-- Fullscreen Image Viewer Modal -->
+    <div id="image-viewer-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-2" onclick="closeImageViewer()">
+        <button type="button" onclick="closeImageViewer()" class="absolute top-5 right-5 text-white text-3xl font-bold bg-black/50 w-10 h-10 rounded-full flex items-center justify-center">✕</button>
+        <img id="fullscreen-img" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl transition transform scale-100">
     </div>
 
     <!-- Modal Settings -->
@@ -236,7 +254,7 @@
     <!-- Main Logic Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         let db = null;
         let unsubscribe = null;
@@ -269,10 +287,11 @@
                 saveBtn: "บันทึกข้อมูล",
                 detailTitle: "รายละเอียดสินค้า",
                 closeBtn: "ปิด",
+                editBtn: "แก้ไข",
                 tapDetail: "ดูรายละเอียด",
                 noPhoto: "ไม่มีรูป",
                 deleteConfirm: "ต้องการลบรายการนี้?",
-                viewPhotos: "รูปภาพทั้งหมด",
+                viewPhotos: "รูปภาพทั้งหมด (คลิกเพื่อขยาย)",
                 catModalTitle: "หมวดหมู่ทั้งหมด",
                 allCategories: "📁 ทั้งหมด (All Items)",
                 itemsCount: "รายการ",
@@ -307,10 +326,11 @@
                 saveBtn: "Save Item",
                 detailTitle: "Survey Details",
                 closeBtn: "Close",
+                editBtn: "Edit",
                 tapDetail: "View Details",
                 noPhoto: "No Photo",
                 deleteConfirm: "Delete this item?",
-                viewPhotos: "All Photos",
+                viewPhotos: "All Photos (Click to zoom)",
                 catModalTitle: "All Categories",
                 allCategories: "📁 All Items",
                 itemsCount: "items",
@@ -345,10 +365,11 @@
                 saveBtn: "Simpan Data",
                 detailTitle: "Detail Survei",
                 closeBtn: "Tutup",
+                editBtn: "Edit",
                 tapDetail: "Lihat Detail",
                 noPhoto: "Tanpa Foto",
                 deleteConfirm: "Hapus item ini?",
-                viewPhotos: "Semua Foto",
+                viewPhotos: "Semua Foto (Klik untuk zoom)",
                 catModalTitle: "Semua Kategori",
                 allCategories: "📁 Semua Item",
                 itemsCount: "item",
@@ -390,6 +411,7 @@
             document.getElementById('btn-save').innerText = t.saveBtn;
             document.getElementById('detail-modal-title').innerText = t.detailTitle;
             document.getElementById('btn-close').innerText = t.closeBtn;
+            document.getElementById('btn-edit-item').innerText = t.editBtn;
             document.getElementById('cat-modal-title').innerText = t.catModalTitle;
             document.getElementById('btn-close-cat').innerText = t.closeBtn;
 
@@ -436,17 +458,67 @@
             location.reload();
         };
 
-        window.openForm = function() {
+        window.openForm = function(editData = null) {
             document.getElementById('survey-modal').classList.remove('hidden');
             document.getElementById('survey-form').reset();
-            document.getElementById('categoryCustom').classList.add('hidden');
-            document.getElementById('packageUnitCustom').classList.add('hidden');
+            document.getElementById('categoryCustomContainer').classList.add('hidden');
+            document.getElementById('packageUnitCustomContainer').classList.add('hidden');
             document.getElementById('photo-preview-grid').classList.add('hidden');
             document.getElementById('photo-preview-grid').innerHTML = '';
             window.currentPhotos = [];
+
+            if (editData) {
+                document.getElementById('editItemId').value = editData.id;
+                document.getElementById('storeName').value = editData.storeName || '';
+                document.getElementById('brand').value = editData.brand || '';
+                document.getElementById('productName').value = editData.productName || '';
+                
+                const catSelect = document.getElementById('categorySelect');
+                const defaultCats = ["อาหาร", "เครื่องดื่ม", "อุปกรณ์ไฟฟ้า", "ห้องครัว"];
+                if (defaultCats.includes(editData.category)) {
+                    catSelect.value = editData.category;
+                } else {
+                    catSelect.value = "custom";
+                    document.getElementById('categoryCustomContainer').classList.remove('hidden');
+                    document.getElementById('categoryCustom').value = editData.category || '';
+                }
+
+                document.getElementById('regularPriceInput').value = editData.regularPrice || '';
+                document.getElementById('promoPriceInput').value = editData.promoPrice || '';
+                document.getElementById('packageSize').value = editData.packageSize || '';
+
+                const unitSelect = document.getElementById('packageUnitSelect');
+                const defaultUnits = ["กรัม", "มิลลิลิตร", "ชิ้น", "แพ็ค"];
+                if (defaultUnits.includes(editData.packageUnit)) {
+                    unitSelect.value = editData.packageUnit;
+                } else {
+                    unitSelect.value = "custom";
+                    document.getElementById('packageUnitCustomContainer').classList.remove('hidden');
+                    document.getElementById('packageUnitCustom').value = editData.packageUnit || '';
+                }
+
+                document.getElementById('itemNote').value = editData.note || '';
+                window.currentPhotos = getItemPhotos(editData);
+                renderPhotoPreviews();
+                calculateUnit();
+            } else {
+                document.getElementById('editItemId').value = '';
+            }
+            updateDatalists();
         };
 
         window.closeForm = function() { document.getElementById('survey-modal').classList.add('hidden'); };
+
+        function updateDatalists() {
+            const items = window.surveyItems || [];
+            const stores = [...new Set(items.map(i => i.storeName).filter(Boolean))];
+            const brands = [...new Set(items.map(i => i.brand).filter(Boolean))];
+            const products = [...new Set(items.map(i => i.productName).filter(Boolean))];
+
+            document.getElementById('store-list').innerHTML = stores.map(s => `<option value="${s}">`).join('');
+            document.getElementById('brand-list').innerHTML = brands.map(b => `<option value="${b}">`).join('');
+            document.getElementById('product-list').innerHTML = products.map(p => `<option value="${p}">`).join('');
+        }
 
         window.openCategoryModal = function() {
             const t = i18n[window.currentLang];
@@ -527,7 +599,7 @@
             const photos = getItemPhotos(item);
             let photosHtml = `<div class="text-xs text-slate-400">${t.noPhoto}</div>`;
             if (photos.length > 0) {
-                photosHtml = `<div class="grid grid-cols-2 gap-2">${photos.map(p => `<img src="${p}" class="w-full h-36 object-cover rounded-2xl border border-slate-100">`).join('')}</div>`;
+                photosHtml = `<div class="grid grid-cols-2 gap-2">${photos.map(p => `<img src="${p}" onclick="openImageViewer('${p}')" class="w-full h-36 object-cover rounded-2xl border border-slate-100 cursor-pointer hover:opacity-90 transition">`).join('')}</div>`;
             }
 
             document.getElementById('detail-content').innerHTML = `
@@ -545,33 +617,75 @@
                     ${photosHtml}
                 </div>
             `;
+            document.getElementById('btn-edit-item').setAttribute('onclick', `closeDetail(); openForm(window.surveyItems.find(i => i.id === '${item.id}'))`);
             document.getElementById('detail-modal').classList.remove('hidden');
         };
 
         window.closeDetail = function() { document.getElementById('detail-modal').classList.add('hidden'); };
 
+        // Fullscreen Image Viewer
+        window.openImageViewer = function(src) {
+            document.getElementById('fullscreen-img').src = src;
+            document.getElementById('image-viewer-modal').classList.remove('hidden');
+        };
+
+        window.closeImageViewer = function() {
+            document.getElementById('image-viewer-modal').classList.add('hidden');
+        };
+
         window.handleCategoryChange = function() {
             const select = document.getElementById('categorySelect');
-            const customInput = document.getElementById('categoryCustom');
+            const customContainer = document.getElementById('categoryCustomContainer');
             if (select.value === 'custom') {
-                customInput.classList.remove('hidden');
-                customInput.focus();
+                customContainer.classList.remove('hidden');
+                document.getElementById('categoryCustom').focus();
             } else {
-                customInput.classList.add('hidden');
-                customInput.value = '';
+                customContainer.classList.add('hidden');
+                document.getElementById('categoryCustom').value = '';
             }
+        };
+
+        window.confirmCustomCategory = function() {
+            const val = document.getElementById('categoryCustom').value.trim();
+            if (!val) { alert("Please enter a category"); return; }
+            const select = document.getElementById('categorySelect');
+            let opt = Array.from(select.options).find(o => o.value === val);
+            if (!opt) {
+                opt = document.createElement('option');
+                opt.value = val;
+                opt.text = val;
+                select.insertBefore(opt, select.lastElementChild);
+            }
+            select.value = val;
+            document.getElementById('categoryCustomContainer').classList.add('hidden');
         };
 
         window.handleUnitChange = function() {
             const select = document.getElementById('packageUnitSelect');
-            const customInput = document.getElementById('packageUnitCustom');
+            const customContainer = document.getElementById('packageUnitCustomContainer');
             if (select.value === 'custom') {
-                customInput.classList.remove('hidden');
-                customInput.focus();
+                customContainer.classList.remove('hidden');
+                document.getElementById('packageUnitCustom').focus();
             } else {
-                customInput.classList.add('hidden');
-                customInput.value = '';
+                customContainer.classList.add('hidden');
+                document.getElementById('packageUnitCustom').value = '';
             }
+            window.calculateUnit();
+        };
+
+        window.confirmCustomUnit = function() {
+            const val = document.getElementById('packageUnitCustom').value.trim();
+            if (!val) { alert("Please enter a unit"); return; }
+            const select = document.getElementById('packageUnitSelect');
+            let opt = Array.from(select.options).find(o => o.value === val);
+            if (!opt) {
+                opt = document.createElement('option');
+                opt.value = val;
+                opt.text = val;
+                select.insertBefore(opt, select.lastElementChild);
+            }
+            select.value = val;
+            document.getElementById('packageUnitCustomContainer').classList.add('hidden');
             window.calculateUnit();
         };
 
@@ -680,7 +794,6 @@
 
                 return `
                     <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-3xl shadow-sm border border-slate-100 hover:border-amber-300 transition flex flex-col justify-between cursor-pointer relative group">
-                        <!-- Favorite Heart Icon Mock -->
                         <button type="button" onclick="event.stopPropagation(); deleteItemFromCloud('${item.id}')" class="absolute top-4 right-4 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 shadow-sm z-10 transition">
                             🗑️
                         </button>
@@ -747,6 +860,7 @@
                 });
                 window.renderItems();
                 renderQuickTabs();
+                updateDatalists();
             }, (error) => { document.getElementById('conn-status').innerText = "● Sync Error"; });
         }
 
@@ -754,6 +868,7 @@
             event.preventDefault();
             if (!db) { alert("Please configure Firebase first (⚙️)"); window.openSettings(); return; }
 
+            const editId = document.getElementById('editItemId').value;
             const catSelect = document.getElementById('categorySelect').value;
             const finalCategory = catSelect === 'custom' ? document.getElementById('categoryCustom').value.trim() : catSelect;
             const unitSelect = document.getElementById('packageUnitSelect').value;
@@ -773,7 +888,11 @@
                 timestamp: new Date().toISOString()
             };
             try {
-                await addDoc(collection(db, "surveys"), item);
+                if (editId) {
+                    await updateDoc(doc(db, "surveys", editId), item);
+                } else {
+                    await addDoc(collection(db, "surveys"), item);
+                }
                 window.closeForm();
                 document.getElementById('survey-form').reset();
                 window.currentPhotos = [];
