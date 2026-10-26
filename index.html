@@ -209,6 +209,16 @@
             document.getElementById('survey-modal').classList.add('hidden');
         };
 
+        // Helper to extract photos from both old format (item.photo) and new format (item.photos)
+        function getItemPhotos(item) {
+            if (item.photos && Array.isArray(item.photos) && item.photos.length > 0) {
+                return item.photos;
+            } else if (item.photo) {
+                return [item.photo];
+            }
+            return [];
+        }
+
         window.openDetail = function(id) {
             const item = window.surveyItems.find(i => i.id === id);
             if (!item) return;
@@ -217,9 +227,10 @@
             const regPrice = item.regularPrice ? `${item.regularPrice} บาท` : '-';
             const promoPrice = item.promoPrice ? `${item.promoPrice} บาท` : '-';
             
+            const photos = getItemPhotos(item);
             let photosHtml = '<div class="text-xs text-slate-400">ไม่มีรูปภาพ</div>';
-            if (item.photos && item.photos.length > 0) {
-                photosHtml = `<div class="grid grid-cols-2 gap-2">${item.photos.map(p => `<img src="${p}" class="w-full h-32 object-cover rounded-lg border">`).join('')}</div>`;
+            if (photos.length > 0) {
+                photosHtml = `<div class="grid grid-cols-2 gap-2">${photos.map(p => `<img src="${p}" class="w-full h-32 object-cover rounded-lg border">`).join('')}</div>`;
             }
 
             document.getElementById('detail-content').innerHTML = `
@@ -231,7 +242,7 @@
                     <p><strong>ราคาโปรโมชั่น:</strong> ${promoPrice}</p>
                     <p><strong>ขนาดบรรจุ:</strong> ${unitText}</p>
                     <p><strong>วันที่บันทึก:</strong> ${new Date(item.timestamp).toLocaleString()}</p>
-                    <div><strong>รูปภาพสินค้า (${item.photos ? item.photos.length : 0} รูป):</strong></div>
+                    <div><strong>รูปภาพสินค้า (${photos.length} รูป):</strong></div>
                     ${photosHtml}
                 </div>
             `;
@@ -355,8 +366,10 @@
 
             listEl.innerHTML = filtered.map(item => {
                 const priceToShow = item.promoPrice ? item.promoPrice : item.regularPrice;
-                const thumbImg = (item.photos && item.photos.length > 0) ? item.photos[0] : '';
-                const photoCount = item.photos ? item.photos.length : 0;
+                const photos = getItemPhotos(item);
+                const thumbImg = photos.length > 0 ? photos[0] : '';
+                const photoCount = photos.length;
+
                 return `
                     <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex gap-3 items-center cursor-pointer hover:border-blue-400 transition">
                         <div class="w-20 h-20 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden border relative">
@@ -390,7 +403,8 @@
             }
             let csvContent = "\uFEFFสถานที่,แบรนด์,ประเภท,ราคาปกติ,ราคาโปรโมชั่น,ขนาดบรรจุ,หน่วย,จำนวนรูป,วันที่\n";
             items.forEach(i => {
-                csvContent += `"${i.storeName}","${i.brand}","${i.category || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${i.photos ? i.photos.length : 0}","${i.timestamp}"\n`;
+                const photos = getItemPhotos(i);
+                csvContent += `"${i.storeName}","${i.brand}","${i.category || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${photos.length}","${i.timestamp}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
