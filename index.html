@@ -5,30 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market Survey Collector</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased pb-24">
+<body class="bg-[#F8F9FA] text-slate-800 antialiased pb-28">
 
-    <!-- Header -->
-    <header class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
+    <!-- Header / Top Bar -->
+    <header class="bg-white sticky top-0 z-40 border-b border-slate-100 shadow-sm">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <!-- Category Tab / Menu Button -->
-                <button type="button" onclick="openCategoryModal()" id="btn-cat-menu" class="bg-blue-700 hover:bg-blue-800 text-xs px-2.5 py-1.5 rounded font-medium transition flex items-center gap-1 cursor-pointer">
-                    📁 <span id="txt-cat-menu">หมวดหมู่</span>
+                <button type="button" onclick="openCategoryModal()" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-700 transition cursor-pointer shadow-sm">
+                    📁
                 </button>
                 <div>
-                    <h1 id="ui-title" class="font-bold text-base">Market Survey</h1>
-                    <p id="conn-status" class="text-[10px] text-amber-200">● กำลังโหลดระบบ...</p>
+                    <h1 id="ui-title" class="font-bold text-base text-slate-900 leading-tight">Market Survey</h1>
+                    <p id="conn-status" class="text-[10px] text-amber-600 font-medium">● Connecting...</p>
                 </div>
             </div>
-            <div class="flex items-center gap-1.5">
-                <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-blue-700 text-white text-xs px-1.5 py-1.5 rounded outline-none cursor-pointer">
+            <div class="flex items-center gap-2">
+                <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-slate-100 text-slate-700 text-xs px-2 py-1.5 rounded-full font-semibold outline-none cursor-pointer border border-slate-200">
                     <option value="th">🇹🇭 TH</option>
                     <option value="en">🇬🇧 EN</option>
                     <option value="id">🇮🇩 ID</option>
                 </select>
-                <button type="button" onclick="exportCSV()" id="btn-export" class="bg-blue-700 hover:bg-blue-800 text-xs px-2 py-1.5 rounded font-medium transition">Export</button>
-                <button type="button" onclick="openSettings()" class="bg-blue-700 hover:bg-blue-800 p-2 rounded-full transition cursor-pointer">⚙️</button>
+                <button type="button" onclick="openSettings()" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-700 transition cursor-pointer shadow-sm">
+                    ⚙️
+                </button>
             </div>
         </div>
     </header>
@@ -36,165 +40,195 @@
     <!-- Main Container -->
     <main class="max-w-md mx-auto p-4 space-y-4">
         
-        <!-- Filter Bar -->
-        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex gap-2">
-            <input type="text" id="search-box" placeholder="🔍 ค้นหาแบรนด์, สินค้า, สถานที่..." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="renderItems()">
+        <!-- Search & Filter Bar -->
+        <div class="flex gap-2 items-center">
+            <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔍</span>
+                <input type="text" id="search-box" placeholder="Search product, store..." class="w-full bg-white text-sm text-slate-800 placeholder-slate-400 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 outline-none focus:border-amber-400 shadow-sm transition" oninput="renderItems()">
+            </div>
+            <button type="button" onclick="exportCSV()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 px-4 py-3 rounded-2xl font-semibold text-xs transition shadow-sm flex-shrink-0">
+                Export
+            </button>
         </div>
 
-        <!-- Survey List -->
-        <div id="survey-list" class="space-y-3">
-            <div id="ui-loading" class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-200">กำลังโหลดข้อมูล...</div>
+        <!-- Pill Category Tabs (Mock / Quick Filter) -->
+        <div id="quick-category-tabs" class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <!-- Dynamic Category Pills -->
+        </div>
+
+        <!-- Survey List Grid (2 Columns Style) -->
+        <div id="survey-list" class="grid grid-cols-2 gap-3">
+            <div id="ui-loading" class="col-span-2 text-center py-12 text-slate-400 bg-white rounded-3xl border border-slate-100 shadow-sm">Loading...</div>
         </div>
 
     </main>
 
-    <!-- Floating Action Button -->
-    <div class="fixed bottom-6 right-6 z-40">
-        <button type="button" onclick="openForm()" class="bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl transition transform active:scale-95">+</button>
-    </div>
+    <!-- Bottom Navigation Bar (Modern App Style) -->
+    <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-100 z-30 max-w-md mx-auto px-6 py-2.5 flex justify-between items-center shadow-lg">
+        <button onclick="filterByCategory(null)" class="flex flex-col items-center text-amber-500 gap-0.5">
+            <span class="text-xl">🏠</span>
+            <span class="text-[10px] font-bold">Home</span>
+        </button>
+        <button onclick="openCategoryModal()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-0.5">
+            <span class="text-xl">📁</span>
+            <span class="text-[10px] font-medium" id="nav-cat">Category</span>
+        </button>
+        <!-- Center Floating Action Button -->
+        <div class="relative -top-5">
+            <button type="button" onclick="openForm()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-14 h-14 rounded-full shadow-xl shadow-amber-400/30 flex items-center justify-center text-3xl font-light transition transform active:scale-90">
+                +
+            </button>
+        </div>
+        <button onclick="exportCSV()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-0.5">
+            <span class="text-xl">📊</span>
+            <span class="text-[10px] font-medium">Export</span>
+        </button>
+        <button onclick="openSettings()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-0.5">
+            <span class="text-xl">⚙️</span>
+            <span class="text-[10px] font-medium">Settings</span>
+        </button>
+    </nav>
 
     <!-- Modal Form (Add / Edit) -->
-    <div id="survey-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-end sm:items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-xl">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h2 id="form-modal-title" class="font-bold text-lg text-slate-800">บันทึกข้อมูลสินค้าสำรวจ</h2>
-                <button type="button" onclick="closeForm()" class="text-slate-400 hover:text-slate-600 font-bold text-xl p-1">✕</button>
+    <div id="survey-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h2 id="form-modal-title" class="font-bold text-lg text-slate-900">New Survey Item</h2>
+                <button type="button" onclick="closeForm()" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">✕</button>
             </div>
 
-            <form id="survey-form" onsubmit="saveItem(event)" class="space-y-3 text-sm">
+            <form id="survey-form" onsubmit="saveItem(event)" class="space-y-3.5 text-sm">
                 <div>
-                    <label id="lbl-store" class="block font-medium text-slate-700 mb-1">สถานที่สำรวจ *</label>
-                    <input type="text" id="storeName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
+                    <label id="lbl-store" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Store / Location *</label>
+                    <input type="text" id="storeName" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label id="lbl-brand" class="block font-medium text-slate-700 mb-1">แบรนด์สินค้า *</label>
-                        <input type="text" id="brand" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
+                        <label id="lbl-brand" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Brand *</label>
+                        <input type="text" id="brand" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
                     </div>
                     <div>
-                        <label id="lbl-productname" class="block font-medium text-slate-700 mb-1">ชื่อสินค้า (Product Name) *</label>
-                        <input type="text" id="productName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
+                        <label id="lbl-productname" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Product Name *</label>
+                        <input type="text" id="productName" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition">
                     </div>
                 </div>
 
                 <div>
-                    <label id="lbl-category" class="block font-medium text-slate-700 mb-1">หมวดหมู่สินค้า</label>
-                    <select id="categorySelect" class="w-full border border-slate-300 rounded-lg px-2 py-2 outline-none focus:border-blue-500 mb-1" onchange="handleCategoryChange()">
+                    <label id="lbl-category" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Category</label>
+                    <select id="categorySelect" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 mb-2 transition" onchange="handleCategoryChange()">
                         <option value="อาหาร">🍽️ อาหาร (Food)</option>
                         <option value="เครื่องดื่ม">🥤 เครื่องดื่ม (Beverage)</option>
                         <option value="อุปกรณ์ไฟฟ้า">⚡ อุปกรณ์ไฟฟ้า (Electronics)</option>
                         <option value="ห้องครัว">🍳 ห้องครัว (Kitchen)</option>
                         <option value="custom">-- ✍️ ระบุเอง (Other) --</option>
                     </select>
-                    <input type="text" id="categoryCustom" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500 hidden">
+                    <input type="text" id="categoryCustom" placeholder="Enter category..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 hidden transition">
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label id="lbl-regprice" class="block font-medium text-slate-700 mb-1">ราคาปกติ (Rp)</label>
-                        <input type="text" id="regularPriceInput" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="formatPriceInput(this); calculateUnit();">
+                        <label id="lbl-regprice" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Regular Price (Rp)</label>
+                        <input type="text" id="regularPriceInput" placeholder="50,000" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition" oninput="formatPriceInput(this); calculateUnit();">
                     </div>
                     <div>
-                        <label id="lbl-promoprice" class="block font-medium text-slate-700 mb-1">ราคาโปรโมชั่น (Rp)</label>
-                        <input type="text" id="promoPriceInput" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="formatPriceInput(this); calculateUnit();">
+                        <label id="lbl-promoprice" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Promo Price (Rp)</label>
+                        <input type="text" id="promoPriceInput" placeholder="45,000" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition" oninput="formatPriceInput(this); calculateUnit();">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label id="lbl-pkgsize" class="block font-medium text-slate-700 mb-1">ขนาดบรรจุ</label>
-                        <input type="number" id="packageSize" step="any" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="calculateUnit()">
+                        <label id="lbl-pkgsize" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Package Size</label>
+                        <input type="number" id="packageSize" step="any" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition" oninput="calculateUnit()">
                     </div>
                     <div>
-                        <label id="lbl-pkgunit" class="block font-medium text-slate-700 mb-1">หน่วย</label>
-                        <select id="packageUnitSelect" class="w-full border border-slate-300 rounded-lg px-2 py-2 outline-none focus:border-blue-500 mb-1" onchange="handleUnitChange()">
+                        <label id="lbl-pkgunit" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Unit</label>
+                        <select id="packageUnitSelect" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 mb-2 transition" onchange="handleUnitChange()">
                             <option value="กรัม">กรัม (g)</option>
                             <option value="มิลลิลิตร">มิลลิลิตร (ml)</option>
                             <option value="ชิ้น">ชิ้น (pcs)</option>
                             <option value="แพ็ค">แพ็ค</option>
                             <option value="custom">-- พิมพ์ระบุเอง --</option>
                         </select>
-                        <input type="text" id="packageUnitCustom" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500 hidden" oninput="calculateUnit()">
+                        <input type="text" id="packageUnitCustom" placeholder="Enter unit..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 hidden transition">
                     </div>
                 </div>
 
-                <div class="bg-blue-50 p-2.5 rounded-lg text-xs text-blue-800 flex justify-between">
-                    <span id="calc-discount">ส่วนลด: 0%</span>
-                    <span id="calc-unitprice" class="font-bold">ราคาเฉลี่ย: -</span>
+                <div class="bg-amber-50 p-3 rounded-2xl text-xs text-amber-900 flex justify-between font-medium">
+                    <span id="calc-discount">Discount: 0%</span>
+                    <span id="calc-unitprice" class="font-bold">Avg: -</span>
                 </div>
 
                 <div>
-                    <label id="lbl-note" class="block font-medium text-slate-700 mb-1">หมายเหตุ / Note (รายละเอียดเพิ่มเติม)</label>
-                    <textarea id="itemNote" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500"></textarea>
+                    <label id="lbl-note" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Note / Remarks</label>
+                    <textarea id="itemNote" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-amber-400 transition"></textarea>
                 </div>
 
                 <div>
-                    <label id="lbl-photos" class="block font-medium text-slate-700 mb-1">รูปถ่ายสินค้า / ป้ายราคา (สูงสุด 5 รูป)</label>
-                    <input type="file" id="itemPhoto" accept="image/*" multiple class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="previewImages(event)">
+                    <label id="lbl-photos" class="block font-semibold text-slate-700 mb-1 text-xs uppercase tracking-wider">Photos (Max 5)</label>
+                    <input type="file" id="itemPhoto" accept="image/*" multiple class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" onchange="previewImages(event)">
                     <div id="photo-preview-grid" class="mt-2 grid grid-cols-5 gap-2 hidden"></div>
                 </div>
 
-                <button type="submit" id="btn-save" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition">บันทึกข้อมูลเข้า Cloud</button>
+                <button type="submit" id="btn-save" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold py-3.5 rounded-2xl transition shadow-lg shadow-amber-400/20">Save to Cloud</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal Category List (Category Tab) -->
-    <div id="category-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-xl">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h2 id="cat-modal-title" class="font-bold text-lg text-slate-800">หมวดหมู่สินค้าทั้งหมด</h2>
-                <button type="button" onclick="closeCategoryModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl p-1">✕</button>
+    <!-- Modal Category List -->
+    <div id="category-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h2 id="cat-modal-title" class="font-bold text-lg text-slate-900">All Categories</h2>
+                <button type="button" onclick="closeCategoryModal()" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">✕</button>
             </div>
-            <div id="category-list-container" class="space-y-2">
-                <!-- Category groups injected here -->
-            </div>
-            <button type="button" onclick="closeCategoryModal()" id="btn-close-cat" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg text-sm transition">ปิด</button>
+            <div id="category-list-container" class="space-y-2"></div>
+            <button type="button" onclick="closeCategoryModal()" id="btn-close-cat" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-sm transition">Close</button>
         </div>
     </div>
 
-    <!-- Modal Detail (View Full Info) -->
-    <div id="detail-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-xl">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h2 id="detail-modal-title" class="font-bold text-lg text-slate-800">รายละเอียดข้อมูลสำรวจ</h2>
-                <button type="button" onclick="closeDetail()" class="text-slate-400 hover:text-slate-600 font-bold text-xl p-1">✕</button>
+    <!-- Modal Detail -->
+    <div id="detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h2 id="detail-modal-title" class="font-bold text-lg text-slate-900">Survey Details</h2>
+                <button type="button" onclick="closeDetail()" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">✕</button>
             </div>
-            <div id="detail-content" class="space-y-3 text-sm"></div>
-            <button type="button" onclick="closeDetail()" id="btn-close" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg text-sm transition">ปิด</button>
+            <div id="detail-content" class="space-y-2.5 text-sm text-slate-700"></div>
+            <button type="button" onclick="closeDetail()" id="btn-close" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-sm transition">Close</button>
         </div>
     </div>
 
     <!-- Modal Settings -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl p-5 space-y-4 shadow-xl">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h2 class="font-bold text-lg text-slate-800">ตั้งค่า Firebase Cloud</h2>
-                <button type="button" onclick="closeSettings()" class="text-slate-400 hover:text-slate-600 font-bold text-xl p-1">✕</button>
+    <div id="settings-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h2 class="font-bold text-lg text-slate-900">Firebase Config</h2>
+                <button type="button" onclick="closeSettings()" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">✕</button>
             </div>
-            <p class="text-xs text-slate-500">นำข้อมูล Firebase Config มาใส่ที่นี่เพื่อเชื่อมต่อฐานข้อมูลกลางร่วมกับทีมงาน</p>
-            <div class="space-y-2 text-xs">
+            <p class="text-xs text-slate-500">Configure your Firestore credentials here.</p>
+            <div class="space-y-2.5 text-xs">
                 <div>
-                    <label class="font-medium">API Key</label>
-                    <input type="text" id="cfg-apiKey" class="w-full border rounded p-1.5 mt-0.5 outline-none focus:border-blue-500">
+                    <label class="font-semibold text-slate-700">API Key</label>
+                    <input type="text" id="cfg-apiKey" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 mt-1 outline-none focus:border-amber-400">
                 </div>
                 <div>
-                    <label class="font-medium">Auth Domain</label>
-                    <input type="text" id="cfg-authDomain" class="w-full border rounded p-1.5 mt-0.5 outline-none focus:border-blue-500">
+                    <label class="font-semibold text-slate-700">Auth Domain</label>
+                    <input type="text" id="cfg-authDomain" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 mt-1 outline-none focus:border-amber-400">
                 </div>
                 <div>
-                    <label class="font-medium">Project ID</label>
-                    <input type="text" id="cfg-projectId" class="w-full border rounded p-1.5 mt-0.5 outline-none focus:border-blue-500">
+                    <label class="font-semibold text-slate-700">Project ID</label>
+                    <input type="text" id="cfg-projectId" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 mt-1 outline-none focus:border-amber-400">
                 </div>
                 <div>
-                    <label class="font-medium">App ID</label>
-                    <input type="text" id="cfg-appId" class="w-full border rounded p-1.5 mt-0.5 outline-none focus:border-blue-500">
+                    <label class="font-semibold text-slate-700">App ID</label>
+                    <input type="text" id="cfg-appId" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 mt-1 outline-none focus:border-amber-400">
                 </div>
             </div>
             <div class="flex gap-2 pt-2">
-                <button type="button" onclick="saveSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm transition">บันทึก & เชื่อมต่อ</button>
-                <button type="button" onclick="closeSettings()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg text-sm transition">ปิด</button>
+                <button type="button" onclick="saveSettings()" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold py-3 rounded-2xl text-sm transition">Save & Connect</button>
+                <button type="button" onclick="closeSettings()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-sm transition">Cancel</button>
             </div>
         </div>
     </div>
@@ -209,56 +243,56 @@
         window.surveyItems = [];
         window.currentPhotos = [];
         window.currentLang = localStorage.getItem('app_lang') || 'th';
-        window.selectedCategoryFilter = null; // สำหรับกรองเมื่อเลือกจากหมวดหมู่
+        window.selectedCategoryFilter = null;
 
         const i18n = {
             th: {
                 title: "Market Survey",
                 catMenu: "หมวดหมู่",
-                searchPlaceholder: "🔍 ค้นหาแบรนด์, สินค้า, สถานที่, หมวดหมู่...",
+                searchPlaceholder: "🔍 ค้นหาแบรนด์, สินค้า, สถานที่...",
                 export: "Export",
-                noData: "ยังไม่มีข้อมูลสำรวจ หรือไม่พบข้อมูลที่ค้นหา",
+                noData: "ยังไม่มีข้อมูลสำรวจ",
                 loading: "กำลังโหลดข้อมูล...",
-                connReady: "● Cloud Connected (พร้อมใช้งาน)",
-                connWait: "● กำลังโหลดระบบ...",
-                formTitle: "บันทึกข้อมูลสินค้าสำรวจ",
+                connReady: "● Cloud Connected",
+                connWait: "● กำลังโหลด...",
+                formTitle: "บันทึกข้อมูลสินค้า",
                 store: "สถานที่สำรวจ *",
-                brand: "แบรนด์สินค้า *",
-                productName: "ชื่อสินค้า (Product Name) *",
+                brand: "แบรนด์ *",
+                productName: "ชื่อสินค้า *",
                 category: "หมวดหมู่สินค้า",
                 regPrice: "ราคาปกติ (Rp)",
                 promoPrice: "ราคาโปรโมชั่น (Rp)",
                 pkgSize: "ขนาดบรรจุ",
                 pkgUnit: "หน่วย",
-                note: "หมายเหตุ / Note (รายละเอียดเพิ่มเติม)",
-                photos: "รูปถ่ายสินค้า / ป้ายราคา (สูงสุด 5 รูป)",
-                saveBtn: "บันทึกข้อมูลเข้า Cloud",
-                detailTitle: "รายละเอียดข้อมูลสำรวจ",
+                note: "หมายเหตุ / Note",
+                photos: "รูปภาพสินค้า (สูงสุด 5 รูป)",
+                saveBtn: "บันทึกข้อมูล",
+                detailTitle: "รายละเอียดสินค้า",
                 closeBtn: "ปิด",
-                tapDetail: "แตะดูรายละเอียด",
+                tapDetail: "ดูรายละเอียด",
                 noPhoto: "ไม่มีรูป",
-                deleteConfirm: "ต้องการลบรายการนี้ใช่หรือไม่?",
-                viewPhotos: "รูปภาพสินค้า",
-                catModalTitle: "หมวดหมู่สินค้าทั้งหมด",
+                deleteConfirm: "ต้องการลบรายการนี้?",
+                viewPhotos: "รูปภาพทั้งหมด",
+                catModalTitle: "หมวดหมู่ทั้งหมด",
                 allCategories: "📁 ทั้งหมด (All Items)",
                 itemsCount: "รายการ",
-                storePlaceholder: "เช่น Lotus Pluit, Supermarket A",
+                storePlaceholder: "เช่น Lotus Pluit",
                 brandPlaceholder: "ชื่อแบรนด์",
-                productPlaceholder: "ชื่อรุ่น / ชื่อสินค้า",
-                pkgSizePlaceholder: "เช่น 150 หรือ 12",
-                notePlaceholder: "ระบุรายละเอียดเพิ่มเติม...",
-                customCatPlaceholder: "พิมพ์หมวดหมู่เอง...",
-                customUnitPlaceholder: "พิมพ์หน่วยเอง..."
+                productPlaceholder: "ชื่อสินค้า / รุ่น",
+                pkgSizePlaceholder: "เช่น 150",
+                notePlaceholder: "ระบุรายละเอียด...",
+                customCatPlaceholder: "พิมพ์หมวดหมู่...",
+                customUnitPlaceholder: "พิมพ์หน่วย..."
             },
             en: {
                 title: "Market Survey",
                 catMenu: "Category",
-                searchPlaceholder: "🔍 Search brand, product, location, category...",
+                searchPlaceholder: "🔍 Search brand, product, store...",
                 export: "Export",
                 noData: "No survey data found.",
                 loading: "Loading data...",
-                connReady: "● Cloud Connected (Ready)",
-                connWait: "● Loading system...",
+                connReady: "● Cloud Connected",
+                connWait: "● Loading...",
                 formTitle: "New Survey Item",
                 store: "Store / Location *",
                 brand: "Brand Name *",
@@ -269,21 +303,21 @@
                 pkgSize: "Package Size",
                 pkgUnit: "Unit",
                 note: "Note / Remarks",
-                photos: "Product / Price Tag Photos (Max 5)",
-                saveBtn: "Save to Cloud",
+                photos: "Photos (Max 5)",
+                saveBtn: "Save Item",
                 detailTitle: "Survey Details",
                 closeBtn: "Close",
-                tapDetail: "Tap for details",
+                tapDetail: "View Details",
                 noPhoto: "No Photo",
-                deleteConfirm: "Are you sure to delete this item?",
-                viewPhotos: "Product Photos",
+                deleteConfirm: "Delete this item?",
+                viewPhotos: "All Photos",
                 catModalTitle: "All Categories",
                 allCategories: "📁 All Items",
                 itemsCount: "items",
-                storePlaceholder: "e.g., Lotus Pluit, Supermarket A",
+                storePlaceholder: "e.g., Lotus Pluit",
                 brandPlaceholder: "Brand name",
-                productPlaceholder: "Product / Model name",
-                pkgSizePlaceholder: "e.g., 150 or 12",
+                productPlaceholder: "Product name",
+                pkgSizePlaceholder: "e.g., 150",
                 notePlaceholder: "Add notes...",
                 customCatPlaceholder: "Enter category...",
                 customUnitPlaceholder: "Enter unit..."
@@ -291,38 +325,38 @@
             id: {
                 title: "Market Survey",
                 catMenu: "Kategori",
-                searchPlaceholder: "🔍 Cari merek, produk, lokasi, kategori...",
+                searchPlaceholder: "🔍 Cari merek, produk, toko...",
                 export: "Export",
                 noData: "Belum ada data survei.",
                 loading: "Memuat data...",
-                connReady: "● Cloud Connected (Siap)",
-                connWait: "● Memuat sistem...",
+                connReady: "● Cloud Connected",
+                connWait: "● Memuat...",
                 formTitle: "Catat Data Survei",
                 store: "Lokasi / Toko *",
-                brand: "Merek Produk *",
+                brand: "Merek *",
                 productName: "Nama Produk *",
                 category: "Kategori",
                 regPrice: "Harga Normal (Rp)",
                 promoPrice: "Harga Promo (Rp)",
                 pkgSize: "Ukuran Kemasan",
                 pkgUnit: "Satuan",
-                note: "Catatan / Keterangan",
-                photos: "Foto Produk / Label Harga (Maks 5)",
-                saveBtn: "Simpan ke Cloud",
+                note: "Catatan",
+                photos: "Foto (Maks 5)",
+                saveBtn: "Simpan Data",
                 detailTitle: "Detail Survei",
                 closeBtn: "Tutup",
-                tapDetail: "Ketuk untuk detail",
+                tapDetail: "Lihat Detail",
                 noPhoto: "Tanpa Foto",
-                deleteConfirm: "Yakin ingin menghapus item ini?",
-                viewPhotos: "Foto Produk",
+                deleteConfirm: "Hapus item ini?",
+                viewPhotos: "Semua Foto",
                 catModalTitle: "Semua Kategori",
                 allCategories: "📁 Semua Item",
                 itemsCount: "item",
-                storePlaceholder: "cth: Lotus Pluit, Supermarket A",
+                storePlaceholder: "cth: Lotus Pluit",
                 brandPlaceholder: "Nama merek",
                 productPlaceholder: "Nama produk",
-                pkgSizePlaceholder: "cth: 150 atau 12",
-                notePlaceholder: "Tambahkan catatan...",
+                pkgSizePlaceholder: "cth: 150",
+                notePlaceholder: "Catatan...",
                 customCatPlaceholder: "Ketik kategori...",
                 customUnitPlaceholder: "Ketik satuan..."
             }
@@ -334,14 +368,14 @@
             document.getElementById('lang-select').value = lang;
             updateUIText();
             renderItems();
+            renderQuickTabs();
         };
 
         function updateUIText() {
             const t = i18n[window.currentLang];
             document.getElementById('ui-title').innerText = t.title;
-            document.getElementById('txt-cat-menu').innerText = t.catMenu;
+            document.getElementById('nav-cat').innerText = t.catMenu;
             document.getElementById('search-box').placeholder = t.searchPlaceholder;
-            document.getElementById('btn-export').innerText = t.export;
             document.getElementById('form-modal-title').innerText = t.formTitle;
             document.getElementById('lbl-store').innerText = t.store;
             document.getElementById('lbl-brand').innerText = t.brand;
@@ -355,11 +389,10 @@
             document.getElementById('lbl-photos').innerText = t.photos;
             document.getElementById('btn-save').innerText = t.saveBtn;
             document.getElementById('detail-modal-title').innerText = t.detailTitle;
-            document.getElementById('btn-close').innerText = t.btn-close || t.closeBtn;
+            document.getElementById('btn-close').innerText = t.closeBtn;
             document.getElementById('cat-modal-title').innerText = t.catModalTitle;
             document.getElementById('btn-close-cat').innerText = t.closeBtn;
 
-            // Placeholders
             document.getElementById('storeName').placeholder = t.storePlaceholder;
             document.getElementById('brand').placeholder = t.brandPlaceholder;
             document.getElementById('productName').placeholder = t.productPlaceholder;
@@ -371,9 +404,7 @@
 
         window.formatPriceInput = function(input) {
             let val = input.value.replace(/\D/g, "");
-            if (val !== "") {
-                val = Number(val).toLocaleString('id-ID');
-            }
+            if (val !== "") val = Number(val).toLocaleString('id-ID');
             input.value = val;
         };
 
@@ -391,9 +422,7 @@
             document.getElementById('settings-modal').classList.remove('hidden');
         };
 
-        window.closeSettings = function() {
-            document.getElementById('settings-modal').classList.add('hidden');
-        };
+        window.closeSettings = function() { document.getElementById('settings-modal').classList.add('hidden'); };
 
         window.saveSettings = function() {
             const config = {
@@ -417,35 +446,31 @@
             window.currentPhotos = [];
         };
 
-        window.closeForm = function() {
-            document.getElementById('survey-modal').classList.add('hidden');
-        };
+        window.closeForm = function() { document.getElementById('survey-modal').classList.add('hidden'); };
 
-        // Category Modal (Tab Left)
         window.openCategoryModal = function() {
             const t = i18n[window.currentLang];
             const container = document.getElementById('category-list-container');
             const items = window.surveyItems || [];
-
-            // Group by category
             const catMap = {};
             items.forEach(i => {
-                const cat = i.category || (window.currentLang === 'en' ? 'Uncategorized' : (window.currentLang === 'id' ? 'Tanpa Kategori' : 'ไม่ระบุหมวดหมู่'));
+                const cat = i.category || 'Uncategorized';
                 catMap[cat] = (catMap[cat] || 0) + 1;
             });
 
             let html = `
-                <div onclick="filterByCategory(null)" class="p-3 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100 flex justify-between items-center font-medium text-blue-800">
+                <div onclick="filterByCategory(null)" class="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl cursor-pointer hover:bg-amber-100 flex justify-between items-center font-semibold text-amber-900 transition">
                     <span>${t.allCategories}</span>
-                    <span class="text-xs bg-blue-200 px-2 py-0.5 rounded-full">${items.length} ${t.itemsCount}</span>
+                    <span class="text-xs bg-amber-200 px-2.5 py-1 rounded-full">${items.length} ${t.itemsCount}</span>
                 </div>
             `;
 
             Object.keys(catMap).sort().forEach(cat => {
+                const isSelected = window.selectedCategoryFilter === cat;
                 html += `
-                    <div onclick="filterByCategory('${cat}')" class="p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-blue-400 flex justify-between items-center transition">
+                    <div onclick="filterByCategory('${cat}')" class="p-3.5 bg-slate-50 border ${isSelected ? 'border-amber-400 bg-amber-50/50' : 'border-slate-100'} rounded-2xl cursor-pointer hover:border-amber-300 flex justify-between items-center transition">
                         <span class="font-medium text-slate-700">📁 ${cat}</span>
-                        <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">${catMap[cat]} ${t.itemsCount}</span>
+                        <span class="text-xs bg-slate-200 text-slate-600 px-2.5 py-1 rounded-full">${catMap[cat]} ${t.itemsCount}</span>
                     </div>
                 `;
             });
@@ -454,19 +479,35 @@
             document.getElementById('category-modal').classList.remove('hidden');
         };
 
-        window.closeCategoryModal = function() {
-            document.getElementById('category-modal').classList.add('hidden');
-        };
+        window.closeCategoryModal = function() { document.getElementById('category-modal').classList.add('hidden'); };
 
         window.filterByCategory = function(category) {
             window.selectedCategoryFilter = category;
             closeCategoryModal();
             renderItems();
-            // Show toast or highlight filter if needed
-            if (category) {
-                document.getElementById('search-box').value = '';
-            }
+            renderQuickTabs();
         };
+
+        function renderQuickTabs() {
+            const container = document.getElementById('quick-category-tabs');
+            const items = window.surveyItems || [];
+            const cats = [...new Set(items.map(i => i.category).filter(Boolean))].sort();
+
+            let html = `
+                <button onclick="filterByCategory(null)" class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition ${window.selectedCategoryFilter === null ? 'bg-amber-400 text-slate-900 shadow-md shadow-amber-400/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+                    All Items
+                </button>
+            `;
+            cats.forEach(cat => {
+                const isSel = window.selectedCategoryFilter === cat;
+                html += `
+                    <button onclick="filterByCategory('${cat}')" class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition ${isSel ? 'bg-amber-400 text-slate-900 shadow-md shadow-amber-400/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+                        ${cat}
+                    </button>
+                `;
+            });
+            container.innerHTML = html;
+        }
 
         function getItemPhotos(item) {
             if (item.photos && Array.isArray(item.photos) && item.photos.length > 0) return item.photos;
@@ -486,7 +527,7 @@
             const photos = getItemPhotos(item);
             let photosHtml = `<div class="text-xs text-slate-400">${t.noPhoto}</div>`;
             if (photos.length > 0) {
-                photosHtml = `<div class="grid grid-cols-2 gap-2">${photos.map(p => `<img src="${p}" class="w-full h-32 object-cover rounded-lg border">`).join('')}</div>`;
+                photosHtml = `<div class="grid grid-cols-2 gap-2">${photos.map(p => `<img src="${p}" class="w-full h-36 object-cover rounded-2xl border border-slate-100">`).join('')}</div>`;
             }
 
             document.getElementById('detail-content').innerHTML = `
@@ -507,9 +548,7 @@
             document.getElementById('detail-modal').classList.remove('hidden');
         };
 
-        window.closeDetail = function() {
-            document.getElementById('detail-modal').classList.add('hidden');
-        };
+        window.closeDetail = function() { document.getElementById('detail-modal').classList.add('hidden'); };
 
         window.handleCategoryChange = function() {
             const select = document.getElementById('categorySelect');
@@ -540,7 +579,6 @@
             const reg = parsePrice(document.getElementById('regularPriceInput').value);
             const promo = parsePrice(document.getElementById('promoPriceInput').value);
             const size = parseFloat(document.getElementById('packageSize').value) || 0;
-            
             const selectVal = document.getElementById('packageUnitSelect').value;
             const unit = selectVal === 'custom' ? document.getElementById('packageUnitCustom').value : selectVal;
 
@@ -548,7 +586,6 @@
             let discount = (reg > 0 && promo > 0 && promo < reg) ? Math.round(((reg - promo) / reg) * 100) : 0;
 
             document.getElementById('calc-discount').innerText = `Discount: ${discount}%`;
-
             if (finalPrice > 0 && size > 0) {
                 let unitPrice = finalPrice / size;
                 document.getElementById('calc-unitprice').innerText = `Avg: Rp ${Math.round(unitPrice).toLocaleString('id-ID')} / ${unit || 'unit'}`;
@@ -564,7 +601,6 @@
                 alert("Maximum 5 photos allowed.");
                 return;
             }
-
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -575,16 +611,10 @@
                         const ctx = canvas.getContext('2d');
                         const MAX_WIDTH = 600;
                         const MAX_HEIGHT = 600;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                        } else {
-                            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
+                        let width = img.width, height = img.height;
+                        if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+                        else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                        canvas.width = width; canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
                         window.currentPhotos.push(canvas.toDataURL('image/jpeg', 0.7));
                         renderPhotoPreviews();
@@ -599,15 +629,12 @@
             if (window.currentPhotos.length > 0) {
                 container.classList.remove('hidden');
                 container.innerHTML = window.currentPhotos.map((photo, index) => `
-                    <div class="relative w-full h-16 border rounded-lg overflow-hidden bg-slate-100">
+                    <div class="relative w-full h-16 border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
                         <img src="${photo}" class="w-full h-full object-cover">
-                        <button type="button" onclick="removePhoto(${index})" class="absolute top-0 right-0 bg-red-600 text-white w-5 h-5 flex items-center justify-center text-xs font-bold rounded-bl">×</button>
+                        <button type="button" onclick="removePhoto(${index})" class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs font-bold rounded-bl-xl">✕</button>
                     </div>
                 `).join('');
-            } else {
-                container.classList.add('hidden');
-                container.innerHTML = '';
-            }
+            } else { container.classList.add('hidden'); container.innerHTML = ''; }
         }
 
         window.removePhoto = function(index) {
@@ -621,19 +648,16 @@
             const items = window.surveyItems || [];
             const t = i18n[window.currentLang];
 
-            // Filter by search keyword and Category Tab filter
             let filtered = items.filter(i => {
                 const matchKeyword = 
                     (i.storeName && i.storeName.toLowerCase().includes(keyword)) ||
                     (i.brand && i.brand.toLowerCase().includes(keyword)) ||
                     (i.productName && i.productName.toLowerCase().includes(keyword)) ||
                     (i.category && i.category.toLowerCase().includes(keyword));
-
                 const matchCategory = window.selectedCategoryFilter ? (i.category === window.selectedCategoryFilter) : true;
                 return matchKeyword && matchCategory;
             });
 
-            // SORT ALPHABETICALLY BY PRODUCT NAME (or brand if product name missing)
             filtered.sort((a, b) => {
                 const nameA = (a.productName || a.brand || '').toLowerCase();
                 const nameB = (b.productName || b.brand || '').toLowerCase();
@@ -641,7 +665,7 @@
             });
 
             if (filtered.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-200">${t.noData}</div>`;
+                listEl.innerHTML = `<div class="col-span-2 text-center py-12 text-slate-400 bg-white rounded-3xl border border-slate-100 shadow-sm">${t.noData}</div>`;
                 return;
             }
 
@@ -652,30 +676,27 @@
 
                 const photos = getItemPhotos(item);
                 const thumbImg = photos.length > 0 ? photos[0] : '';
-                const photoCount = photos.length;
                 const displayName = item.productName || item.brand;
-                const displayBrand = item.productName ? `${item.brand}` : '';
 
-                let activeFilterBanner = window.selectedCategoryFilter ? `<div class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg flex justify-between items-center mb-2"><span>📂 หมวดหมู่: <b>${window.selectedCategoryFilter}</b></span><button onclick="filterByCategory(null)" class="text-red-500 font-bold">✕ ล้างตัวกรอง</button></div>` : '';
+                return `
+                    <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-3xl shadow-sm border border-slate-100 hover:border-amber-300 transition flex flex-col justify-between cursor-pointer relative group">
+                        <!-- Favorite Heart Icon Mock -->
+                        <button type="button" onclick="event.stopPropagation(); deleteItemFromCloud('${item.id}')" class="absolute top-4 right-4 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 shadow-sm z-10 transition">
+                            🗑️
+                        </button>
 
-                return (activeFilterBanner ? activeFilterBanner : '') + `
-                    <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex gap-3 items-center cursor-pointer hover:border-blue-400 transition">
-                        <div class="w-20 h-20 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden border relative">
-                            ${thumbImg ? `<img src="${thumbImg}" class="w-full h-full object-cover">` : `<div class="flex items-center justify-center h-full text-xs text-slate-400">${t.noPhoto}</div>`}
-                            ${photoCount > 1 ? `<span class="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1 rounded">📷 ${photoCount}</span>` : ''}
+                        <div class="w-full h-32 bg-slate-50 rounded-2xl overflow-hidden relative mb-2.5">
+                            ${thumbImg ? `<img src="${thumbImg}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">` : `<div class="flex items-center justify-center h-full text-xs text-slate-400">${t.noPhoto}</div>`}
                         </div>
-                        <div class="flex-grow min-w-0">
-                            <div class="flex justify-between items-start">
-                                <h3 class="font-bold text-slate-800 truncate">${displayName} ${displayBrand ? `<span class="text-xs font-normal text-slate-500">(${displayBrand})</span>` : ''}</h3>
-                                <button type="button" onclick="event.stopPropagation(); deleteItemFromCloud('${item.id}')" class="text-slate-300 hover:text-red-500 text-xs px-1">🗑️</button>
-                            </div>
-                            <p class="text-xs text-slate-500 truncate">📍 ${item.storeName} | ${item.category || '-'}</p>
-                            <div class="mt-1 flex items-baseline justify-between">
-                                <div class="flex items-baseline gap-2">
-                                    <span class="font-bold text-blue-600 text-sm">${priceFormatted}</span>
-                                    ${rawReg ? `<span class="text-xs text-slate-400 line-through">${rawReg}</span>` : ''}
-                                </div>
-                                <span class="text-[11px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded">${t.tapDetail}</span>
+
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-wider">${item.category || 'General'}</span>
+                            <h3 class="font-bold text-slate-900 text-sm truncate">${displayName}</h3>
+                            <p class="text-[11px] text-slate-400 truncate">📍 ${item.storeName}</p>
+                            
+                            <div class="pt-1 flex flex-col">
+                                <span class="font-bold text-slate-900 text-sm">${priceFormatted}</span>
+                                ${rawReg ? `<span class="text-[10px] text-slate-400 line-through">${rawReg}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -685,10 +706,7 @@
 
         window.exportCSV = function() {
             const items = window.surveyItems || [];
-            if (items.length === 0) {
-                alert("No data to export");
-                return;
-            }
+            if (items.length === 0) { alert("No data"); return; }
             let csvContent = "\uFEFFStore,Brand,Product Name,Category,Regular Price (Rp),Promo Price (Rp),Package Size,Unit,Note,Photos Count,Timestamp\n";
             items.forEach(i => {
                 const photos = getItemPhotos(i);
@@ -696,8 +714,7 @@
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
+            const a = document.createElement('a'); a.href = url;
             a.download = `market-survey-${new Date().toISOString().slice(0,10)}.csv`;
             a.click();
         };
@@ -709,22 +726,19 @@
                     const app = initializeApp(config);
                     db = getFirestore(app);
                     document.getElementById('conn-status').innerText = i18n[window.currentLang].connReady;
-                    document.getElementById('conn-status').className = "text-xs text-emerald-200";
+                    document.getElementById('conn-status').className = "text-[10px] text-emerald-600 font-medium";
                     loadCloudData();
                 } catch (e) {
-                    document.getElementById('conn-status').innerText = "● Connection Failed";
-                    document.getElementById('conn-status').className = "text-xs text-red-200";
+                    document.getElementById('conn-status').innerText = "● Error";
                 }
             } else {
-                document.getElementById('conn-status').innerText = "● ยังไม่ได้ตั้งค่า Firebase (คลิก ⚙️)";
-                document.getElementById('conn-status').className = "text-xs text-amber-200";
+                document.getElementById('conn-status').innerText = "● Setup Required (⚙️)";
             }
         }
 
         function loadCloudData() {
             if (!db) return;
             if (unsubscribe) unsubscribe();
-            
             const q = collection(db, "surveys");
             unsubscribe = onSnapshot(q, (snapshot) => {
                 window.surveyItems = [];
@@ -732,22 +746,16 @@
                     window.surveyItems.push({ id: docSnap.id, ...docSnap.data() });
                 });
                 window.renderItems();
-            }, (error) => {
-                document.getElementById('conn-status').innerText = "● Sync Error";
-            });
+                renderQuickTabs();
+            }, (error) => { document.getElementById('conn-status').innerText = "● Sync Error"; });
         }
 
         window.saveItem = async function(event) {
             event.preventDefault();
-            if (!db) {
-                alert("Please configure Firebase first (⚙️)");
-                window.openSettings();
-                return;
-            }
+            if (!db) { alert("Please configure Firebase first (⚙️)"); window.openSettings(); return; }
 
             const catSelect = document.getElementById('categorySelect').value;
             const finalCategory = catSelect === 'custom' ? document.getElementById('categoryCustom').value.trim() : catSelect;
-
             const unitSelect = document.getElementById('packageUnitSelect').value;
             const finalUnit = unitSelect === 'custom' ? document.getElementById('packageUnitCustom').value.trim() : unitSelect;
 
@@ -769,19 +777,13 @@
                 window.closeForm();
                 document.getElementById('survey-form').reset();
                 window.currentPhotos = [];
-            } catch (e) {
-                alert("Error saving: " + e.message);
-            }
+            } catch (e) { alert("Error: " + e.message); }
         };
 
         window.deleteItemFromCloud = async function(id) {
             const t = i18n[window.currentLang];
             if (!db || !confirm(t.deleteConfirm)) return;
-            try {
-                await deleteDoc(doc(db, "surveys", id));
-            } catch (e) {
-                alert("Cannot delete: " + e.message);
-            }
+            try { await deleteDoc(doc(db, "surveys", id)); } catch (e) { alert("Cannot delete"); }
         };
 
         window.addEventListener('DOMContentLoaded', () => {
