@@ -12,11 +12,17 @@
     <header class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
             <div>
-                <h1 class="font-bold text-lg">Market Survey Collector</h1>
+                <h1 id="ui-title" class="font-bold text-lg">Market Survey Collector</h1>
                 <p id="conn-status" class="text-xs text-amber-200">● กำลังโหลดระบบ...</p>
             </div>
             <div class="flex items-center gap-2">
-                <button type="button" onclick="exportCSV()" class="bg-blue-700 hover:bg-blue-800 text-xs px-2.5 py-1.5 rounded font-medium transition">Export CSV</button>
+                <!-- Language Switcher -->
+                <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-blue-700 text-white text-xs px-2 py-1.5 rounded outline-none cursor-pointer">
+                    <option value="th">🇹🇭 TH</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="id">🇮🇩 ID</option>
+                </select>
+                <button type="button" onclick="exportCSV()" id="btn-export" class="bg-blue-700 hover:bg-blue-800 text-xs px-2.5 py-1.5 rounded font-medium transition">Export</button>
                 <button type="button" onclick="openSettings()" class="bg-blue-700 hover:bg-blue-800 p-2 rounded-full transition cursor-pointer">⚙️</button>
             </div>
         </div>
@@ -32,7 +38,7 @@
 
         <!-- Survey List -->
         <div id="survey-list" class="space-y-3">
-            <div class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-200">กำลังโหลดข้อมูล...</div>
+            <div id="ui-loading" class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-200">กำลังโหลดข้อมูล...</div>
         </div>
 
     </main>
@@ -46,45 +52,52 @@
     <div id="survey-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-xl">
             <div class="flex justify-between items-center border-b pb-3">
-                <h2 id="modal-title" class="font-bold text-lg text-slate-800">บันทึกข้อมูลสินค้าสำรวจ</h2>
+                <h2 id="form-modal-title" class="font-bold text-lg text-slate-800">บันทึกข้อมูลสินค้าสำรวจ</h2>
                 <button type="button" onclick="closeForm()" class="text-slate-400 hover:text-slate-600 font-bold text-xl p-1">✕</button>
             </div>
 
             <form id="survey-form" onsubmit="saveItem(event)" class="space-y-3 text-sm">
                 <div>
-                    <label class="block font-medium text-slate-700 mb-1">สถานที่สำรวจ (Store / Location) *</label>
+                    <label id="lbl-store" class="block font-medium text-slate-700 mb-1">สถานที่สำรวจ (Store / Location) *</label>
                     <input type="text" id="storeName" required placeholder="เช่น Lotus Pluit, Supermarket A" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-medium text-slate-700 mb-1">แบรนด์สินค้า *</label>
+                        <label id="lbl-brand" class="block font-medium text-slate-700 mb-1">แบรนด์สินค้า *</label>
                         <input type="text" id="brand" required placeholder="ชื่อแบรนด์" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-700 mb-1">ประเภท / รสชาติ</label>
-                        <input type="text" id="category" placeholder="เช่น ช็อกโกแลต, สูตรดั้งเดิม" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
+                        <label id="lbl-category" class="block font-medium text-slate-700 mb-1">หมวดหมู่สินค้า</label>
+                        <select id="categorySelect" class="w-full border border-slate-300 rounded-lg px-2 py-2 outline-none focus:border-blue-500 mb-1" onchange="handleCategoryChange()">
+                            <option value="อาหาร">🍽️ อาหาร (Food)</option>
+                            <option value="เครื่องดื่ม">🥤 เครื่องดื่ม (Beverage)</option>
+                            <option value="อุปกรณ์ไฟฟ้า">⚡ อุปกรณ์ไฟฟ้า (Electronics)</option>
+                            <option value="ห้องครัว">🍳 ห้องครัว (Kitchen)</option>
+                            <option value="custom">-- ✍️ ระบุเอง (Other) --</option>
+                        </select>
+                        <input type="text" id="categoryCustom" placeholder="พิมพ์หมวดหมู่เอง..." class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500 hidden">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-medium text-slate-700 mb-1">ราคาปกติ</label>
-                        <input type="number" id="regularPrice" step="any" placeholder="0.00" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="calculateUnit()">
+                        <label id="lbl-regprice" class="block font-medium text-slate-700 mb-1">ราคาปกติ (Rp)</label>
+                        <input type="text" id="regularPriceInput" placeholder="50,000" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="formatPriceInput(this); calculateUnit();">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-700 mb-1">ราคาโปรโมชั่น</label>
-                        <input type="number" id="promoPrice" step="any" placeholder="0.00" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="calculateUnit()">
+                        <label id="lbl-promoprice" class="block font-medium text-slate-700 mb-1">ราคาโปรโมชั่น (Rp)</label>
+                        <input type="text" id="promoPriceInput" placeholder="45,000" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="formatPriceInput(this); calculateUnit();">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-medium text-slate-700 mb-1">ขนาดบรรจุ</label>
+                        <label id="lbl-pkgsize" class="block font-medium text-slate-700 mb-1">ขนาดบรรจุ</label>
                         <input type="number" id="packageSize" step="any" placeholder="เช่น 150 หรือ 12" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="calculateUnit()">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-700 mb-1">หน่วย (เลือกหรือพิมพ์เอง)</label>
+                        <label id="lbl-pkgunit" class="block font-medium text-slate-700 mb-1">หน่วย</label>
                         <select id="packageUnitSelect" class="w-full border border-slate-300 rounded-lg px-2 py-2 outline-none focus:border-blue-500 mb-1" onchange="handleUnitChange()">
                             <option value="กรัม">กรัม (g)</option>
                             <option value="มิลลิลิตร">มิลลิลิตร (ml)</option>
@@ -102,14 +115,12 @@
                 </div>
 
                 <div>
-                    <label class="block font-medium text-slate-700 mb-1">รูปถ่ายสินค้า / ป้ายราคา (เพิ่มได้สูงสุด 5 รูป)</label>
+                    <label id="lbl-photos" class="block font-medium text-slate-700 mb-1">รูปถ่ายสินค้า / ป้ายราคา (สูงสุด 5 รูป)</label>
                     <input type="file" id="itemPhoto" accept="image/*" multiple class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="previewImages(event)">
-                    <div id="photo-preview-grid" class="mt-2 grid grid-cols-5 gap-2 hidden">
-                        <!-- Preview thumbnails -->
-                    </div>
+                    <div id="photo-preview-grid" class="mt-2 grid grid-cols-5 gap-2 hidden"></div>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition">บันทึกข้อมูลเข้า Cloud</button>
+                <button type="submit" id="btn-save" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition">บันทึกข้อมูลเข้า Cloud</button>
             </form>
         </div>
     </div>
@@ -118,13 +129,11 @@
     <div id="detail-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-xl">
             <div class="flex justify-between items-center border-b pb-3">
-                <h2 class="font-bold text-lg text-slate-800">รายละเอียดข้อมูลสำรวจ</h2>
+                <h2 id="detail-modal-title" class="font-bold text-lg text-slate-800">รายละเอียดข้อมูลสำรวจ</h2>
                 <button type="button" onclick="closeDetail()" class="text-slate-400 hover:text-slate-600 font-bold text-xl p-1">✕</button>
             </div>
-            <div id="detail-content" class="space-y-3 text-sm">
-                <!-- Details injected here -->
-            </div>
-            <button type="button" onclick="closeDetail()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg text-sm transition">ปิด</button>
+            <div id="detail-content" class="space-y-3 text-sm"></div>
+            <button type="button" onclick="closeDetail()" id="btn-close" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg text-sm transition">ปิด</button>
         </div>
     </div>
 
@@ -170,6 +179,125 @@
         let unsubscribe = null;
         window.surveyItems = [];
         window.currentPhotos = [];
+        window.currentLang = localStorage.getItem('app_lang') || 'th';
+
+        const i18n = {
+            th: {
+                title: "Market Survey Collector",
+                searchPlaceholder: "🔍 ค้นหาแบรนด์, สินค้า, สถานที่, หมวดหมู่...",
+                export: "Export CSV",
+                noData: "ยังไม่มีข้อมูลสำรวจ หรือไม่พบข้อมูลที่ค้นหา",
+                loading: "กำลังโหลดข้อมูล...",
+                connReady: "● Cloud Connected (พร้อมใช้งาน)",
+                connWait: "● กำลังโหลดระบบ...",
+                formTitle: "บันทึกข้อมูลสินค้าสำรวจ",
+                store: "สถานที่สำรวจ (Store / Location) *",
+                brand: "แบรนด์สินค้า *",
+                category: "หมวดหมู่สินค้า",
+                regPrice: "ราคาปกติ (Rp)",
+                promoPrice: "ราคาโปรโมชั่น (Rp)",
+                pkgSize: "ขนาดบรรจุ",
+                pkgUnit: "หน่วย",
+                photos: "รูปถ่ายสินค้า / ป้ายราคา (สูงสุด 5 รูป)",
+                saveBtn: "บันทึกข้อมูลเข้า Cloud",
+                detailTitle: "รายละเอียดข้อมูลสำรวจ",
+                closeBtn: "ปิด",
+                tapDetail: "แตะดูรายละเอียด",
+                noPhoto: "ไม่มีรูป",
+                deleteConfirm: "ต้องการลบรายการนี้ใช่หรือไม่?",
+                viewPhotos: "รูปภาพสินค้า"
+            },
+            en: {
+                title: "Market Survey Collector",
+                searchPlaceholder: "🔍 Search brand, product, location, category...",
+                export: "Export CSV",
+                noData: "No survey data found.",
+                loading: "Loading data...",
+                connReady: "● Cloud Connected (Ready)",
+                connWait: "● Loading system...",
+                formTitle: "New Survey Item",
+                store: "Store / Location *",
+                brand: "Brand Name *",
+                category: "Category",
+                regPrice: "Regular Price (Rp)",
+                promoPrice: "Promo Price (Rp)",
+                pkgSize: "Package Size",
+                pkgUnit: "Unit",
+                photos: "Product / Price Tag Photos (Max 5)",
+                saveBtn: "Save to Cloud",
+                detailTitle: "Survey Details",
+                closeBtn: "Close",
+                tapDetail: "Tap for details",
+                noPhoto: "No Photo",
+                deleteConfirm: "Are you sure to delete this item?",
+                viewPhotos: "Product Photos"
+            },
+            id: {
+                title: "Market Survey Collector",
+                searchPlaceholder: "🔍 Cari merek, produk, lokasi, kategori...",
+                export: "Export CSV",
+                noData: "Belum ada data survei.",
+                loading: "Memuat data...",
+                connReady: "● Cloud Connected (Siap)",
+                connWait: "● Memuat sistem...",
+                formTitle: "Catat Data Survei",
+                store: "Lokasi / Toko *",
+                brand: "Merek Produk *",
+                category: "Kategori",
+                regPrice: "Harga Normal (Rp)",
+                promoPrice: "Harga Promo (Rp)",
+                pkgSize: "Ukuran Kemasan",
+                pkgUnit: "Satuan",
+                photos: "Foto Produk / Label Harga (Maks 5)",
+                saveBtn: "Simpan ke Cloud",
+                detailTitle: "Detail Survei",
+                closeBtn: "Tutup",
+                tapDetail: "Ketuk untuk detail",
+                noPhoto: "Tanpa Foto",
+                deleteConfirm: "Yakin ingin menghapus item ini?",
+                viewPhotos: "Foto Produk"
+            }
+        };
+
+        window.changeLanguage = function(lang) {
+            window.currentLang = lang;
+            localStorage.setItem('app_lang', lang);
+            document.getElementById('lang-select').value = lang;
+            updateUIText();
+            renderItems();
+        };
+
+        function updateUIText() {
+            const t = i18n[window.currentLang];
+            document.getElementById('ui-title').innerText = t.title;
+            document.getElementById('search-box').placeholder = t.searchPlaceholder;
+            document.getElementById('btn-export').innerText = t.export;
+            document.getElementById('form-modal-title').innerText = t.formTitle;
+            document.getElementById('lbl-store').innerText = t.store;
+            document.getElementById('lbl-brand').innerText = t.brand;
+            document.getElementById('lbl-category').innerText = t.category;
+            document.getElementById('lbl-regprice').innerText = t.regPrice;
+            document.getElementById('lbl-promoprice').innerText = t.promoPrice;
+            document.getElementById('lbl-pkgsize').innerText = t.pkgSize;
+            document.getElementById('lbl-pkgunit').innerText = t.pkgUnit;
+            document.getElementById('lbl-photos').innerText = t.photos;
+            document.getElementById('btn-save').innerText = t.saveBtn;
+            document.getElementById('detail-modal-title').innerText = t.detailTitle;
+            document.getElementById('btn-close').innerText = t.closeBtn;
+        }
+
+        window.formatPriceInput = function(input) {
+            let val = input.value.replace(/\D/g, "");
+            if (val !== "") {
+                val = Number(val).toLocaleString('id-ID');
+            }
+            input.value = val;
+        };
+
+        function parsePrice(str) {
+            if (!str) return 0;
+            return parseFloat(str.toString().replace(/\./g, '').replace(/,/g, '')) || 0;
+        }
 
         window.openSettings = function() {
             const config = JSON.parse(localStorage.getItem('fb_config') || '{}');
@@ -199,6 +327,7 @@
         window.openForm = function() {
             document.getElementById('survey-modal').classList.remove('hidden');
             document.getElementById('survey-form').reset();
+            document.getElementById('categoryCustom').classList.add('hidden');
             document.getElementById('packageUnitCustom').classList.add('hidden');
             document.getElementById('photo-preview-grid').classList.add('hidden');
             document.getElementById('photo-preview-grid').innerHTML = '';
@@ -209,40 +338,37 @@
             document.getElementById('survey-modal').classList.add('hidden');
         };
 
-        // Helper to extract photos from both old format (item.photo) and new format (item.photos)
         function getItemPhotos(item) {
-            if (item.photos && Array.isArray(item.photos) && item.photos.length > 0) {
-                return item.photos;
-            } else if (item.photo) {
-                return [item.photo];
-            }
+            if (item.photos && Array.isArray(item.photos) && item.photos.length > 0) return item.photos;
+            if (item.photo) return [item.photo];
             return [];
         }
 
         window.openDetail = function(id) {
             const item = window.surveyItems.find(i => i.id === id);
             if (!item) return;
+            const t = i18n[window.currentLang];
 
             const unitText = item.packageSize ? `${item.packageSize} ${item.packageUnit || ''}` : '-';
-            const regPrice = item.regularPrice ? `${item.regularPrice} บาท` : '-';
-            const promoPrice = item.promoPrice ? `${item.promoPrice} บาท` : '-';
+            const regPrice = item.regularPrice ? `Rp ${Number(parsePrice(item.regularPrice)).toLocaleString('id-ID')}` : '-';
+            const promoPrice = item.promoPrice ? `Rp ${Number(parsePrice(item.promoPrice)).toLocaleString('id-ID')}` : '-';
             
             const photos = getItemPhotos(item);
-            let photosHtml = '<div class="text-xs text-slate-400">ไม่มีรูปภาพ</div>';
+            let photosHtml = `<div class="text-xs text-slate-400">${t.noPhoto}</div>`;
             if (photos.length > 0) {
                 photosHtml = `<div class="grid grid-cols-2 gap-2">${photos.map(p => `<img src="${p}" class="w-full h-32 object-cover rounded-lg border">`).join('')}</div>`;
             }
 
             document.getElementById('detail-content').innerHTML = `
                 <div class="space-y-2">
-                    <p><strong>สถานที่:</strong> ${item.storeName}</p>
-                    <p><strong>แบรนด์:</strong> ${item.brand}</p>
-                    <p><strong>ประเภท/รสชาติ:</strong> ${item.category || '-'}</p>
-                    <p><strong>ราคาปกติ:</strong> ${regPrice}</p>
-                    <p><strong>ราคาโปรโมชั่น:</strong> ${promoPrice}</p>
-                    <p><strong>ขนาดบรรจุ:</strong> ${unitText}</p>
-                    <p><strong>วันที่บันทึก:</strong> ${new Date(item.timestamp).toLocaleString()}</p>
-                    <div><strong>รูปภาพสินค้า (${photos.length} รูป):</strong></div>
+                    <p><strong>Store:</strong> ${item.storeName}</p>
+                    <p><strong>Brand:</strong> ${item.brand}</p>
+                    <p><strong>Category:</strong> ${item.category || '-'}</p>
+                    <p><strong>Regular Price:</strong> ${regPrice}</p>
+                    <p><strong>Promo Price:</strong> ${promoPrice}</p>
+                    <p><strong>Package Size:</strong> ${unitText}</p>
+                    <p><strong>Date:</strong> ${new Date(item.timestamp).toLocaleString()}</p>
+                    <div><strong>${t.viewPhotos} (${photos.length}):</strong></div>
                     ${photosHtml}
                 </div>
             `;
@@ -251,6 +377,18 @@
 
         window.closeDetail = function() {
             document.getElementById('detail-modal').classList.add('hidden');
+        };
+
+        window.handleCategoryChange = function() {
+            const select = document.getElementById('categorySelect');
+            const customInput = document.getElementById('categoryCustom');
+            if (select.value === 'custom') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+                customInput.value = '';
+            }
         };
 
         window.handleUnitChange = function() {
@@ -267,8 +405,8 @@
         };
 
         window.calculateUnit = function() {
-            const reg = parseFloat(document.getElementById('regularPrice').value) || 0;
-            const promo = parseFloat(document.getElementById('promoPrice').value) || 0;
+            const reg = parsePrice(document.getElementById('regularPriceInput').value);
+            const promo = parsePrice(document.getElementById('promoPriceInput').value);
             const size = parseFloat(document.getElementById('packageSize').value) || 0;
             
             const selectVal = document.getElementById('packageUnitSelect').value;
@@ -277,22 +415,21 @@
             let finalPrice = promo > 0 ? promo : reg;
             let discount = (reg > 0 && promo > 0 && promo < reg) ? Math.round(((reg - promo) / reg) * 100) : 0;
 
-            document.getElementById('calc-discount').innerText = `ส่วนลด: ${discount}%`;
+            document.getElementById('calc-discount').innerText = `Discount: ${discount}%`;
 
             if (finalPrice > 0 && size > 0) {
                 let unitPrice = finalPrice / size;
-                document.getElementById('calc-unitprice').innerText = `ราคาเฉลี่ย: ${unitPrice.toFixed(2)} / ${unit || 'หน่วย'}`;
+                document.getElementById('calc-unitprice').innerText = `Avg: Rp ${Math.round(unitPrice).toLocaleString('id-ID')} / ${unit || 'unit'}`;
             } else {
-                document.getElementById('calc-unitprice').innerText = `ราคาเฉลี่ย: -`;
+                document.getElementById('calc-unitprice').innerText = `Avg: -`;
             }
         };
 
         window.previewImages = function(event) {
             const files = Array.from(event.target.files);
             if (files.length === 0) return;
-
             if (window.currentPhotos.length + files.length > 5) {
-                alert("สามารถเพิ่มรูปภาพได้สูงสุดไม่เกิน 5 รูปครับ");
+                alert("Maximum 5 photos allowed.");
                 return;
             }
 
@@ -317,9 +454,7 @@
                         canvas.width = width;
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
-                        const resizedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-
-                        window.currentPhotos.push(resizedBase64);
+                        window.currentPhotos.push(canvas.toDataURL('image/jpeg', 0.7));
                         renderPhotoPreviews();
                     }
                 }
@@ -352,6 +487,7 @@
             const keyword = document.getElementById('search-box').value.toLowerCase();
             const listEl = document.getElementById('survey-list');
             const items = window.surveyItems || [];
+            const t = i18n[window.currentLang];
 
             const filtered = items.filter(i => 
                 (i.storeName && i.storeName.toLowerCase().includes(keyword)) ||
@@ -360,12 +496,15 @@
             );
 
             if (filtered.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-200">ยังไม่มีข้อมูลสำรวจ หรือไม่พบข้อมูลที่ค้นหา</div>`;
+                listEl.innerHTML = `<div class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-200">${t.noData}</div>`;
                 return;
             }
 
             listEl.innerHTML = filtered.map(item => {
-                const priceToShow = item.promoPrice ? item.promoPrice : item.regularPrice;
+                const rawPrice = item.promoPrice ? item.promoPrice : item.regularPrice;
+                const priceFormatted = rawPrice ? `Rp ${parsePrice(rawPrice).toLocaleString('id-ID')}` : '-';
+                const rawReg = item.regularPrice && item.promoPrice ? `Rp ${parsePrice(item.regularPrice).toLocaleString('id-ID')}` : '';
+
                 const photos = getItemPhotos(item);
                 const thumbImg = photos.length > 0 ? photos[0] : '';
                 const photoCount = photos.length;
@@ -373,7 +512,7 @@
                 return `
                     <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex gap-3 items-center cursor-pointer hover:border-blue-400 transition">
                         <div class="w-20 h-20 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden border relative">
-                            ${thumbImg ? `<img src="${thumbImg}" class="w-full h-full object-cover">` : `<div class="flex items-center justify-center h-full text-xs text-slate-400">ไม่มีรูป</div>`}
+                            ${thumbImg ? `<img src="${thumbImg}" class="w-full h-full object-cover">` : `<div class="flex items-center justify-center h-full text-xs text-slate-400">${t.noPhoto}</div>`}
                             ${photoCount > 1 ? `<span class="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1 rounded">📷 ${photoCount}</span>` : ''}
                         </div>
                         <div class="flex-grow min-w-0">
@@ -384,10 +523,10 @@
                             <p class="text-xs text-slate-500 truncate">📍 ${item.storeName} | ${item.category || '-'}</p>
                             <div class="mt-1 flex items-baseline justify-between">
                                 <div class="flex items-baseline gap-2">
-                                    <span class="font-bold text-blue-600 text-sm">${priceToShow} ฿</span>
-                                    ${item.promoPrice && item.regularPrice ? `<span class="text-xs text-slate-400 line-through">${item.regularPrice} ฿</span>` : ''}
+                                    <span class="font-bold text-blue-600 text-sm">${priceFormatted}</span>
+                                    ${rawReg ? `<span class="text-xs text-slate-400 line-through">${rawReg}</span>` : ''}
                                 </div>
-                                <span class="text-[11px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded">แตะดูรายละเอียด</span>
+                                <span class="text-[11px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded">${t.tapDetail}</span>
                             </div>
                         </div>
                     </div>
@@ -398,10 +537,10 @@
         window.exportCSV = function() {
             const items = window.surveyItems || [];
             if (items.length === 0) {
-                alert("ยังไม่มีข้อมูลสำหรับ Export");
+                alert("No data to export");
                 return;
             }
-            let csvContent = "\uFEFFสถานที่,แบรนด์,ประเภท,ราคาปกติ,ราคาโปรโมชั่น,ขนาดบรรจุ,หน่วย,จำนวนรูป,วันที่\n";
+            let csvContent = "\uFEFFStore,Brand,Category,Regular Price (Rp),Promo Price (Rp),Package Size,Unit,Photos Count,Timestamp\n";
             items.forEach(i => {
                 const photos = getItemPhotos(i);
                 csvContent += `"${i.storeName}","${i.brand}","${i.category || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${photos.length}","${i.timestamp}"\n`;
@@ -414,14 +553,13 @@
             a.click();
         };
 
-        // Firebase Initialization & Actions
         function initFirebase() {
             const config = JSON.parse(localStorage.getItem('fb_config') || '{}');
             if (config.apiKey && config.projectId) {
                 try {
                     const app = initializeApp(config);
                     db = getFirestore(app);
-                    document.getElementById('conn-status').innerText = "● Cloud Connected (พร้อมใช้งาน)";
+                    document.getElementById('conn-status').innerText = i18n[window.currentLang].connReady;
                     document.getElementById('conn-status').className = "text-xs text-emerald-200";
                     loadCloudData();
                 } catch (e) {
@@ -453,20 +591,23 @@
         window.saveItem = async function(event) {
             event.preventDefault();
             if (!db) {
-                alert("กรุณาตั้งค่า Firebase Config ที่ไอคอนเฟือง (⚙️) ก่อนครับ");
+                alert("Please configure Firebase first (⚙️)");
                 window.openSettings();
                 return;
             }
 
-            const selectVal = document.getElementById('packageUnitSelect').value;
-            const finalUnit = selectVal === 'custom' ? document.getElementById('packageUnitCustom').value.trim() : selectVal;
+            const catSelect = document.getElementById('categorySelect').value;
+            const finalCategory = catSelect === 'custom' ? document.getElementById('categoryCustom').value.trim() : catSelect;
+
+            const unitSelect = document.getElementById('packageUnitSelect').value;
+            const finalUnit = unitSelect === 'custom' ? document.getElementById('packageUnitCustom').value.trim() : unitSelect;
 
             const item = {
                 storeName: document.getElementById('storeName').value,
                 brand: document.getElementById('brand').value,
-                category: document.getElementById('category').value,
-                regularPrice: document.getElementById('regularPrice').value,
-                promoPrice: document.getElementById('promoPrice').value,
+                category: finalCategory,
+                regularPrice: document.getElementById('regularPriceInput').value,
+                promoPrice: document.getElementById('promoPriceInput').value,
                 packageSize: document.getElementById('packageSize').value,
                 packageUnit: finalUnit,
                 photos: window.currentPhotos || [],
@@ -478,20 +619,23 @@
                 document.getElementById('survey-form').reset();
                 window.currentPhotos = [];
             } catch (e) {
-                alert("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
+                alert("Error saving: " + e.message);
             }
         };
 
         window.deleteItemFromCloud = async function(id) {
-            if (!db || !confirm("ต้องการลบรายการนี้ใช่หรือไม่?")) return;
+            const t = i18n[window.currentLang];
+            if (!db || !confirm(t.deleteConfirm)) return;
             try {
                 await deleteDoc(doc(db, "surveys", id));
             } catch (e) {
-                alert("ไม่สามารถลบได้: " + e.message);
+                alert("Cannot delete: " + e.message);
             }
         };
 
         window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('lang-select').value = window.currentLang;
+            updateUIText();
             initFirebase();
         });
     </script>
