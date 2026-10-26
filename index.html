@@ -48,7 +48,7 @@
             <input type="text" id="search-box" placeholder="Search product, store..." class="w-full bg-white text-sm text-slate-800 placeholder-slate-400 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 outline-none focus:border-amber-400 shadow-sm transition" oninput="renderItems()">
         </div>
 
-        <!-- Sort By & Action Buttons Bar -->
+        <!-- Sort By & Compare Bar -->
         <div class="flex gap-2 items-center justify-between">
             <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-2 rounded-2xl shadow-sm text-xs w-full">
                 <span class="text-slate-400 font-medium whitespace-nowrap">Sort:</span>
@@ -61,11 +61,8 @@
                 </select>
             </div>
 
-            <button type="button" onclick="openCompareModal()" id="btn-compare-tab" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2.5 rounded-2xl font-semibold text-xs transition shadow-sm flex-shrink-0 flex items-center gap-1">
-                ⚖️ (<span id="compare-count">0</span>)
-            </button>
-            <button type="button" onclick="exportCSV()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 px-3 py-2.5 rounded-2xl font-semibold text-xs transition shadow-sm flex-shrink-0">
-                Export
+            <button type="button" onclick="openCompareModal()" id="btn-compare-tab" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-2xl font-semibold text-xs transition shadow-sm flex-shrink-0 flex items-center gap-1.5">
+                ⚖️ Compare (<span id="compare-count">0</span>)
             </button>
         </div>
 
@@ -303,12 +300,27 @@
             "Medicine": { th: "ยา", en: "Medicine", id: "Obat" }
         };
 
+        const unitTranslations = {
+            "กรัม": { th: "กรัม", en: "g", id: "gram" },
+            "มิลลิลิตร": { th: "มิลลิลิตร", en: "ml", id: "ml" },
+            "ชิ้น": { th: "ชิ้น", en: "pcs", id: "pcs" },
+            "แพ็ค": { th: "แพ็ค", en: "pack", id: "pack" }
+        };
+
         window.translateCategory = function(cat) {
             if (!cat) return '-';
             if (translations[cat]) {
                 return translations[cat][window.currentLang] || cat;
             }
             return cat;
+        };
+
+        window.translateUnit = function(unit) {
+            if (!unit) return '';
+            if (unitTranslations[unit]) {
+                return unitTranslations[unit][window.currentLang] || unit;
+            }
+            return unit;
         };
 
         const i18n = {
@@ -677,7 +689,7 @@
                 const thumb = photos.length > 0 ? photos[0] : '';
                 const regPrice = item.regularPrice ? `Rp ${parsePrice(item.regularPrice).toLocaleString('id-ID')}` : '-';
                 const promoPrice = item.promoPrice ? `Rp ${parsePrice(item.promoPrice).toLocaleString('id-ID')}` : '-';
-                const unitText = item.packageSize ? `${item.packageSize} ${item.packageUnit || ''}` : '-';
+                const unitText = item.packageSize ? `${item.packageSize} ${window.translateUnit(item.packageUnit || '')}` : '-';
 
                 html += `
                     <div class="min-w-[220px] max-w-[220px] bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between space-y-3">
@@ -714,7 +726,7 @@
             if (!item) return;
             const t = i18n[window.currentLang];
 
-            const unitText = item.packageSize ? `${item.packageSize} ${item.packageUnit || ''}` : '-';
+            const unitText = item.packageSize ? `${item.packageSize} ${window.translateUnit(item.packageUnit || '')}` : '-';
             const regPrice = item.regularPrice ? `Rp ${Number(parsePrice(item.regularPrice)).toLocaleString('id-ID')}` : '-';
             const promoPrice = item.promoPrice ? `Rp ${Number(parsePrice(item.promoPrice)).toLocaleString('id-ID')}` : '-';
             
@@ -890,7 +902,6 @@
                 return matchKeyword && matchCategory;
             });
 
-            // DYNAMIC SORTING LOGIC
             filtered.sort((a, b) => {
                 if (sortBy === 'packageSize') {
                     const sizeA = parseFloat(a.packageSize) || 0;
@@ -899,7 +910,7 @@
                 } else if (sortBy === 'timestamp') {
                     const dateA = new Date(a.timestamp || 0);
                     const dateB = new Date(b.timestamp || 0);
-                    return dateB - dateA; // Newest first
+                    return dateB - dateA;
                 } else {
                     const valA = (a[sortBy] || '').toLowerCase();
                     const valB = (b[sortBy] || '').toLowerCase();
@@ -922,14 +933,19 @@
                 const displayName = item.productName || item.brand;
                 const translatedCategory = window.translateCategory(item.category);
                 const isCompared = window.compareList.includes(item.id);
+                
+                const pkgSizeVal = item.packageSize ? item.packageSize : '';
+                const pkgUnitVal = window.translateUnit(item.packageUnit || '');
 
                 return `
                     <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-3xl shadow-sm border ${isCompared ? 'border-amber-400 bg-amber-50/20' : 'border-slate-100'} hover:border-amber-300 transition flex flex-col justify-between cursor-pointer relative group">
-                        <button type="button" onclick="toggleCompare('${item.id}', event)" class="absolute top-4 left-4 w-7 h-7 ${isCompared ? 'bg-amber-400 text-slate-900 font-bold' : 'bg-white/80 text-slate-400'} backdrop-blur-sm rounded-full flex items-center justify-center text-xs shadow-sm z-10 transition hover:scale-110" title="Select for comparison">
+                        <!-- Modern Minimalist Compare Button (Top Left) -->
+                        <button type="button" onclick="toggleCompare('${item.id}', event)" class="absolute top-4 left-4 w-8 h-8 ${isCompared ? 'bg-amber-400 text-slate-900 font-bold shadow-md' : 'bg-white/80 text-slate-600 hover:bg-white'} backdrop-blur-md rounded-full flex items-center justify-center text-xs shadow-sm z-10 transition transform active:scale-95" title="Select for comparison">
                             ⚖️
                         </button>
 
-                        <button type="button" onclick="event.stopPropagation(); deleteItemFromCloud('${item.id}')" class="absolute top-4 right-4 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 shadow-sm z-10 transition">
+                        <!-- Modern Minimalist Delete Button (Top Right) -->
+                        <button type="button" onclick="event.stopPropagation(); deleteItemFromCloud('${item.id}')" class="absolute top-4 right-4 w-8 h-8 bg-white/80 hover:bg-white backdrop-blur-md rounded-full flex items-center justify-center text-slate-600 hover:text-red-500 shadow-sm z-10 transition transform active:scale-95" title="Delete">
                             🗑️
                         </button>
 
@@ -942,9 +958,17 @@
                             <h3 class="font-bold text-slate-900 text-sm truncate">${displayName}</h3>
                             <p class="text-[11px] text-slate-400 truncate">📍 ${item.storeName}</p>
                             
-                            <div class="pt-1 flex flex-col">
-                                <span class="font-bold text-slate-900 text-sm">${priceFormatted}</span>
-                                ${rawReg ? `<span class="text-[10px] text-slate-400 line-through">${rawReg}</span>` : ''}
+                            <div class="pt-1 flex justify-between items-end">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-slate-900 text-sm">${priceFormatted}</span>
+                                    ${rawReg ? `<span class="text-[10px] text-slate-400 line-through">${rawReg}</span>` : ''}
+                                </div>
+                                ${pkgSizeVal ? `
+                                    <div class="text-right flex flex-col justify-end">
+                                        <span class="font-bold text-xs text-slate-700 leading-none">${pkgSizeVal}</span>
+                                        <span class="text-[10px] text-slate-400 uppercase leading-tight mt-0.5">${pkgUnitVal}</span>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                     </div>
@@ -958,7 +982,7 @@
             let csvContent = "\uFEFFStore,Brand,Product Name,Category,Regular Price (Rp),Promo Price (Rp),Package Size,Unit,Note,Photos Count,Timestamp\n";
             items.forEach(i => {
                 const photos = getItemPhotos(i);
-                csvContent += `"${i.storeName}","${i.brand}","${i.productName || ''}","${window.translateCategory(i.category) || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${i.note || ''}","${photos.length}","${i.timestamp}"\n`;
+                csvContent += `"${i.storeName}","${i.brand}","${i.productName || ''}","${window.translateCategory(i.category) || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${window.translateUnit(i.packageUnit || '')}","${i.note || ''}","${photos.length}","${i.timestamp}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
