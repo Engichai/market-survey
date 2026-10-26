@@ -16,8 +16,8 @@
     <header class="bg-white sticky top-0 z-40 border-b border-slate-100 shadow-sm">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <button type="button" onclick="openCategoryModal()" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-700 transition cursor-pointer shadow-sm">
-                    📁
+                <button type="button" onclick="openCategoryModal()" class="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition cursor-pointer border border-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
                 </button>
                 <div>
                     <h1 id="ui-title" class="font-bold text-base text-slate-900 leading-tight">Market Survey</h1>
@@ -25,13 +25,13 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-slate-100 text-slate-700 text-xs px-2 py-1.5 rounded-full font-semibold outline-none cursor-pointer border border-slate-200">
+                <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-slate-50 text-slate-700 text-xs px-2.5 py-1.5 rounded-full font-semibold outline-none cursor-pointer border border-slate-200">
                     <option value="th">🇹🇭 TH</option>
                     <option value="en">🇬🇧 EN</option>
                     <option value="id">🇮🇩 ID</option>
                 </select>
-                <button type="button" onclick="openSettings()" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-700 transition cursor-pointer shadow-sm">
-                    ⚙️
+                <button type="button" onclick="openSettings()" class="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition cursor-pointer border border-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </button>
             </div>
         </div>
@@ -43,10 +43,13 @@
         <!-- Search & Filter Bar -->
         <div class="flex gap-2 items-center">
             <div class="relative w-full">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔍</span>
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
                 <input type="text" id="search-box" placeholder="Search product, store..." class="w-full bg-white text-sm text-slate-800 placeholder-slate-400 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 outline-none focus:border-amber-400 shadow-sm transition" oninput="renderItems()">
             </div>
-            <button type="button" onclick="exportCSV()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 px-4 py-3 rounded-2xl font-semibold text-xs transition shadow-sm flex-shrink-0">
+            <button type="button" onclick="exportCSV()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 px-4 py-3 rounded-2xl font-semibold text-xs transition shadow-sm flex-shrink-0 flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Export
             </button>
         </div>
@@ -61,27 +64,32 @@
 
     </main>
 
-    <!-- Bottom Navigation Bar -->
+    <!-- Bottom Navigation Bar (Modern SVG Icons) -->
     <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-100 z-30 max-w-md mx-auto px-6 py-2.5 flex justify-between items-center shadow-lg">
-        <button onclick="filterByCategory(null)" class="flex flex-col items-center text-amber-500 gap-0.5">
-            <span class="text-xl">🏠</span>
+        <!-- Home -->
+        <button onclick="filterByCategory(null)" class="flex flex-col items-center text-amber-500 gap-1 group transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
             <span class="text-[10px] font-bold">Home</span>
         </button>
-        <button onclick="openCategoryModal()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-0.5">
-            <span class="text-xl">📁</span>
+        <!-- Category -->
+        <button onclick="openCategoryModal()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-1 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             <span class="text-[10px] font-medium" id="nav-cat">Category</span>
         </button>
+        <!-- Center Floating Action Button -->
         <div class="relative -top-5">
-            <button type="button" onclick="openForm()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-14 h-14 rounded-full shadow-xl shadow-amber-400/30 flex items-center justify-center text-3xl font-light transition transform active:scale-90">
-                +
+            <button type="button" onclick="openForm()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 w-14 h-14 rounded-full shadow-xl shadow-amber-400/30 flex items-center justify-center transition transform active:scale-90">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             </button>
         </div>
-        <button onclick="exportCSV()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-0.5">
-            <span class="text-xl">📊</span>
+        <!-- Export / Stats -->
+        <button onclick="exportCSV()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-1 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             <span class="text-[10px] font-medium">Export</span>
         </button>
-        <button onclick="openSettings()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-0.5">
-            <span class="text-xl">⚙️</span>
+        <!-- Settings -->
+        <button onclick="openSettings()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-1 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             <span class="text-[10px] font-medium">Settings</span>
         </button>
     </nav>
@@ -623,7 +631,6 @@
 
         window.closeDetail = function() { document.getElementById('detail-modal').classList.add('hidden'); };
 
-        // Fullscreen Image Viewer
         window.openImageViewer = function(src) {
             document.getElementById('fullscreen-img').src = src;
             document.getElementById('image-viewer-modal').classList.remove('hidden');
