@@ -11,18 +11,23 @@
     <!-- Header -->
     <header class="bg-blue-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
-            <div>
-                <h1 id="ui-title" class="font-bold text-lg">Market Survey Collector</h1>
-                <p id="conn-status" class="text-xs text-amber-200">● กำลังโหลดระบบ...</p>
-            </div>
             <div class="flex items-center gap-2">
-                <!-- Language Switcher -->
-                <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-blue-700 text-white text-xs px-2 py-1.5 rounded outline-none cursor-pointer">
+                <!-- Category Tab / Menu Button -->
+                <button type="button" onclick="openCategoryModal()" id="btn-cat-menu" class="bg-blue-700 hover:bg-blue-800 text-xs px-2.5 py-1.5 rounded font-medium transition flex items-center gap-1 cursor-pointer">
+                    📁 <span id="txt-cat-menu">หมวดหมู่</span>
+                </button>
+                <div>
+                    <h1 id="ui-title" class="font-bold text-base">Market Survey</h1>
+                    <p id="conn-status" class="text-[10px] text-amber-200">● กำลังโหลดระบบ...</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-blue-700 text-white text-xs px-1.5 py-1.5 rounded outline-none cursor-pointer">
                     <option value="th">🇹🇭 TH</option>
                     <option value="en">🇬🇧 EN</option>
                     <option value="id">🇮🇩 ID</option>
                 </select>
-                <button type="button" onclick="exportCSV()" id="btn-export" class="bg-blue-700 hover:bg-blue-800 text-xs px-2.5 py-1.5 rounded font-medium transition">Export</button>
+                <button type="button" onclick="exportCSV()" id="btn-export" class="bg-blue-700 hover:bg-blue-800 text-xs px-2 py-1.5 rounded font-medium transition">Export</button>
                 <button type="button" onclick="openSettings()" class="bg-blue-700 hover:bg-blue-800 p-2 rounded-full transition cursor-pointer">⚙️</button>
             </div>
         </div>
@@ -58,43 +63,48 @@
 
             <form id="survey-form" onsubmit="saveItem(event)" class="space-y-3 text-sm">
                 <div>
-                    <label id="lbl-store" class="block font-medium text-slate-700 mb-1">สถานที่สำรวจ (Store / Location) *</label>
-                    <input type="text" id="storeName" required placeholder="เช่น Lotus Pluit, Supermarket A" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
+                    <label id="lbl-store" class="block font-medium text-slate-700 mb-1">สถานที่สำรวจ *</label>
+                    <input type="text" id="storeName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label id="lbl-brand" class="block font-medium text-slate-700 mb-1">แบรนด์สินค้า *</label>
-                        <input type="text" id="brand" required placeholder="ชื่อแบรนด์" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
+                        <input type="text" id="brand" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
                     </div>
                     <div>
-                        <label id="lbl-category" class="block font-medium text-slate-700 mb-1">หมวดหมู่สินค้า</label>
-                        <select id="categorySelect" class="w-full border border-slate-300 rounded-lg px-2 py-2 outline-none focus:border-blue-500 mb-1" onchange="handleCategoryChange()">
-                            <option value="อาหาร">🍽️ อาหาร (Food)</option>
-                            <option value="เครื่องดื่ม">🥤 เครื่องดื่ม (Beverage)</option>
-                            <option value="อุปกรณ์ไฟฟ้า">⚡ อุปกรณ์ไฟฟ้า (Electronics)</option>
-                            <option value="ห้องครัว">🍳 ห้องครัว (Kitchen)</option>
-                            <option value="custom">-- ✍️ ระบุเอง (Other) --</option>
-                        </select>
-                        <input type="text" id="categoryCustom" placeholder="พิมพ์หมวดหมู่เอง..." class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500 hidden">
+                        <label id="lbl-productname" class="block font-medium text-slate-700 mb-1">ชื่อสินค้า (Product Name) *</label>
+                        <input type="text" id="productName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500">
                     </div>
+                </div>
+
+                <div>
+                    <label id="lbl-category" class="block font-medium text-slate-700 mb-1">หมวดหมู่สินค้า</label>
+                    <select id="categorySelect" class="w-full border border-slate-300 rounded-lg px-2 py-2 outline-none focus:border-blue-500 mb-1" onchange="handleCategoryChange()">
+                        <option value="อาหาร">🍽️ อาหาร (Food)</option>
+                        <option value="เครื่องดื่ม">🥤 เครื่องดื่ม (Beverage)</option>
+                        <option value="อุปกรณ์ไฟฟ้า">⚡ อุปกรณ์ไฟฟ้า (Electronics)</option>
+                        <option value="ห้องครัว">🍳 ห้องครัว (Kitchen)</option>
+                        <option value="custom">-- ✍️ ระบุเอง (Other) --</option>
+                    </select>
+                    <input type="text" id="categoryCustom" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500 hidden">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label id="lbl-regprice" class="block font-medium text-slate-700 mb-1">ราคาปกติ (Rp)</label>
-                        <input type="text" id="regularPriceInput" placeholder="50,000" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="formatPriceInput(this); calculateUnit();">
+                        <input type="text" id="regularPriceInput" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="formatPriceInput(this); calculateUnit();">
                     </div>
                     <div>
                         <label id="lbl-promoprice" class="block font-medium text-slate-700 mb-1">ราคาโปรโมชั่น (Rp)</label>
-                        <input type="text" id="promoPriceInput" placeholder="45,000" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="formatPriceInput(this); calculateUnit();">
+                        <input type="text" id="promoPriceInput" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="formatPriceInput(this); calculateUnit();">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label id="lbl-pkgsize" class="block font-medium text-slate-700 mb-1">ขนาดบรรจุ</label>
-                        <input type="number" id="packageSize" step="any" placeholder="เช่น 150 หรือ 12" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="calculateUnit()">
+                        <input type="number" id="packageSize" step="any" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" oninput="calculateUnit()">
                     </div>
                     <div>
                         <label id="lbl-pkgunit" class="block font-medium text-slate-700 mb-1">หน่วย</label>
@@ -105,13 +115,18 @@
                             <option value="แพ็ค">แพ็ค</option>
                             <option value="custom">-- พิมพ์ระบุเอง --</option>
                         </select>
-                        <input type="text" id="packageUnitCustom" placeholder="พิมพ์หน่วยเอง..." class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500 hidden" oninput="calculateUnit()">
+                        <input type="text" id="packageUnitCustom" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500 hidden" oninput="calculateUnit()">
                     </div>
                 </div>
 
                 <div class="bg-blue-50 p-2.5 rounded-lg text-xs text-blue-800 flex justify-between">
                     <span id="calc-discount">ส่วนลด: 0%</span>
                     <span id="calc-unitprice" class="font-bold">ราคาเฉลี่ย: -</span>
+                </div>
+
+                <div>
+                    <label id="lbl-note" class="block font-medium text-slate-700 mb-1">หมายเหตุ / Note (รายละเอียดเพิ่มเติม)</label>
+                    <textarea id="itemNote" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500"></textarea>
                 </div>
 
                 <div>
@@ -122,6 +137,20 @@
 
                 <button type="submit" id="btn-save" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition">บันทึกข้อมูลเข้า Cloud</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Category List (Category Tab) -->
+    <div id="category-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h2 id="cat-modal-title" class="font-bold text-lg text-slate-800">หมวดหมู่สินค้าทั้งหมด</h2>
+                <button type="button" onclick="closeCategoryModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl p-1">✕</button>
+            </div>
+            <div id="category-list-container" class="space-y-2">
+                <!-- Category groups injected here -->
+            </div>
+            <button type="button" onclick="closeCategoryModal()" id="btn-close-cat" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg text-sm transition">ปิด</button>
         </div>
     </div>
 
@@ -180,24 +209,28 @@
         window.surveyItems = [];
         window.currentPhotos = [];
         window.currentLang = localStorage.getItem('app_lang') || 'th';
+        window.selectedCategoryFilter = null; // สำหรับกรองเมื่อเลือกจากหมวดหมู่
 
         const i18n = {
             th: {
-                title: "Market Survey Collector",
+                title: "Market Survey",
+                catMenu: "หมวดหมู่",
                 searchPlaceholder: "🔍 ค้นหาแบรนด์, สินค้า, สถานที่, หมวดหมู่...",
-                export: "Export CSV",
+                export: "Export",
                 noData: "ยังไม่มีข้อมูลสำรวจ หรือไม่พบข้อมูลที่ค้นหา",
                 loading: "กำลังโหลดข้อมูล...",
                 connReady: "● Cloud Connected (พร้อมใช้งาน)",
                 connWait: "● กำลังโหลดระบบ...",
                 formTitle: "บันทึกข้อมูลสินค้าสำรวจ",
-                store: "สถานที่สำรวจ (Store / Location) *",
+                store: "สถานที่สำรวจ *",
                 brand: "แบรนด์สินค้า *",
+                productName: "ชื่อสินค้า (Product Name) *",
                 category: "หมวดหมู่สินค้า",
                 regPrice: "ราคาปกติ (Rp)",
                 promoPrice: "ราคาโปรโมชั่น (Rp)",
                 pkgSize: "ขนาดบรรจุ",
                 pkgUnit: "หน่วย",
+                note: "หมายเหตุ / Note (รายละเอียดเพิ่มเติม)",
                 photos: "รูปถ่ายสินค้า / ป้ายราคา (สูงสุด 5 รูป)",
                 saveBtn: "บันทึกข้อมูลเข้า Cloud",
                 detailTitle: "รายละเอียดข้อมูลสำรวจ",
@@ -205,12 +238,23 @@
                 tapDetail: "แตะดูรายละเอียด",
                 noPhoto: "ไม่มีรูป",
                 deleteConfirm: "ต้องการลบรายการนี้ใช่หรือไม่?",
-                viewPhotos: "รูปภาพสินค้า"
+                viewPhotos: "รูปภาพสินค้า",
+                catModalTitle: "หมวดหมู่สินค้าทั้งหมด",
+                allCategories: "📁 ทั้งหมด (All Items)",
+                itemsCount: "รายการ",
+                storePlaceholder: "เช่น Lotus Pluit, Supermarket A",
+                brandPlaceholder: "ชื่อแบรนด์",
+                productPlaceholder: "ชื่อรุ่น / ชื่อสินค้า",
+                pkgSizePlaceholder: "เช่น 150 หรือ 12",
+                notePlaceholder: "ระบุรายละเอียดเพิ่มเติม...",
+                customCatPlaceholder: "พิมพ์หมวดหมู่เอง...",
+                customUnitPlaceholder: "พิมพ์หน่วยเอง..."
             },
             en: {
-                title: "Market Survey Collector",
+                title: "Market Survey",
+                catMenu: "Category",
                 searchPlaceholder: "🔍 Search brand, product, location, category...",
-                export: "Export CSV",
+                export: "Export",
                 noData: "No survey data found.",
                 loading: "Loading data...",
                 connReady: "● Cloud Connected (Ready)",
@@ -218,11 +262,13 @@
                 formTitle: "New Survey Item",
                 store: "Store / Location *",
                 brand: "Brand Name *",
+                productName: "Product Name *",
                 category: "Category",
                 regPrice: "Regular Price (Rp)",
                 promoPrice: "Promo Price (Rp)",
                 pkgSize: "Package Size",
                 pkgUnit: "Unit",
+                note: "Note / Remarks",
                 photos: "Product / Price Tag Photos (Max 5)",
                 saveBtn: "Save to Cloud",
                 detailTitle: "Survey Details",
@@ -230,12 +276,23 @@
                 tapDetail: "Tap for details",
                 noPhoto: "No Photo",
                 deleteConfirm: "Are you sure to delete this item?",
-                viewPhotos: "Product Photos"
+                viewPhotos: "Product Photos",
+                catModalTitle: "All Categories",
+                allCategories: "📁 All Items",
+                itemsCount: "items",
+                storePlaceholder: "e.g., Lotus Pluit, Supermarket A",
+                brandPlaceholder: "Brand name",
+                productPlaceholder: "Product / Model name",
+                pkgSizePlaceholder: "e.g., 150 or 12",
+                notePlaceholder: "Add notes...",
+                customCatPlaceholder: "Enter category...",
+                customUnitPlaceholder: "Enter unit..."
             },
             id: {
-                title: "Market Survey Collector",
+                title: "Market Survey",
+                catMenu: "Kategori",
                 searchPlaceholder: "🔍 Cari merek, produk, lokasi, kategori...",
-                export: "Export CSV",
+                export: "Export",
                 noData: "Belum ada data survei.",
                 loading: "Memuat data...",
                 connReady: "● Cloud Connected (Siap)",
@@ -243,11 +300,13 @@
                 formTitle: "Catat Data Survei",
                 store: "Lokasi / Toko *",
                 brand: "Merek Produk *",
+                productName: "Nama Produk *",
                 category: "Kategori",
                 regPrice: "Harga Normal (Rp)",
                 promoPrice: "Harga Promo (Rp)",
                 pkgSize: "Ukuran Kemasan",
                 pkgUnit: "Satuan",
+                note: "Catatan / Keterangan",
                 photos: "Foto Produk / Label Harga (Maks 5)",
                 saveBtn: "Simpan ke Cloud",
                 detailTitle: "Detail Survei",
@@ -255,7 +314,17 @@
                 tapDetail: "Ketuk untuk detail",
                 noPhoto: "Tanpa Foto",
                 deleteConfirm: "Yakin ingin menghapus item ini?",
-                viewPhotos: "Foto Produk"
+                viewPhotos: "Foto Produk",
+                catModalTitle: "Semua Kategori",
+                allCategories: "📁 Semua Item",
+                itemsCount: "item",
+                storePlaceholder: "cth: Lotus Pluit, Supermarket A",
+                brandPlaceholder: "Nama merek",
+                productPlaceholder: "Nama produk",
+                pkgSizePlaceholder: "cth: 150 atau 12",
+                notePlaceholder: "Tambahkan catatan...",
+                customCatPlaceholder: "Ketik kategori...",
+                customUnitPlaceholder: "Ketik satuan..."
             }
         };
 
@@ -270,20 +339,34 @@
         function updateUIText() {
             const t = i18n[window.currentLang];
             document.getElementById('ui-title').innerText = t.title;
+            document.getElementById('txt-cat-menu').innerText = t.catMenu;
             document.getElementById('search-box').placeholder = t.searchPlaceholder;
             document.getElementById('btn-export').innerText = t.export;
             document.getElementById('form-modal-title').innerText = t.formTitle;
             document.getElementById('lbl-store').innerText = t.store;
             document.getElementById('lbl-brand').innerText = t.brand;
+            document.getElementById('lbl-productname').innerText = t.productName;
             document.getElementById('lbl-category').innerText = t.category;
             document.getElementById('lbl-regprice').innerText = t.regPrice;
             document.getElementById('lbl-promoprice').innerText = t.promoPrice;
             document.getElementById('lbl-pkgsize').innerText = t.pkgSize;
             document.getElementById('lbl-pkgunit').innerText = t.pkgUnit;
+            document.getElementById('lbl-note').innerText = t.note;
             document.getElementById('lbl-photos').innerText = t.photos;
             document.getElementById('btn-save').innerText = t.saveBtn;
             document.getElementById('detail-modal-title').innerText = t.detailTitle;
-            document.getElementById('btn-close').innerText = t.closeBtn;
+            document.getElementById('btn-close').innerText = t.btn-close || t.closeBtn;
+            document.getElementById('cat-modal-title').innerText = t.catModalTitle;
+            document.getElementById('btn-close-cat').innerText = t.closeBtn;
+
+            // Placeholders
+            document.getElementById('storeName').placeholder = t.storePlaceholder;
+            document.getElementById('brand').placeholder = t.brandPlaceholder;
+            document.getElementById('productName').placeholder = t.productPlaceholder;
+            document.getElementById('packageSize').placeholder = t.pkgSizePlaceholder;
+            document.getElementById('itemNote').placeholder = t.notePlaceholder;
+            document.getElementById('categoryCustom').placeholder = t.customCatPlaceholder;
+            document.getElementById('packageUnitCustom').placeholder = t.customUnitPlaceholder;
         }
 
         window.formatPriceInput = function(input) {
@@ -338,6 +421,53 @@
             document.getElementById('survey-modal').classList.add('hidden');
         };
 
+        // Category Modal (Tab Left)
+        window.openCategoryModal = function() {
+            const t = i18n[window.currentLang];
+            const container = document.getElementById('category-list-container');
+            const items = window.surveyItems || [];
+
+            // Group by category
+            const catMap = {};
+            items.forEach(i => {
+                const cat = i.category || (window.currentLang === 'en' ? 'Uncategorized' : (window.currentLang === 'id' ? 'Tanpa Kategori' : 'ไม่ระบุหมวดหมู่'));
+                catMap[cat] = (catMap[cat] || 0) + 1;
+            });
+
+            let html = `
+                <div onclick="filterByCategory(null)" class="p-3 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100 flex justify-between items-center font-medium text-blue-800">
+                    <span>${t.allCategories}</span>
+                    <span class="text-xs bg-blue-200 px-2 py-0.5 rounded-full">${items.length} ${t.itemsCount}</span>
+                </div>
+            `;
+
+            Object.keys(catMap).sort().forEach(cat => {
+                html += `
+                    <div onclick="filterByCategory('${cat}')" class="p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-blue-400 flex justify-between items-center transition">
+                        <span class="font-medium text-slate-700">📁 ${cat}</span>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">${catMap[cat]} ${t.itemsCount}</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('category-modal').classList.remove('hidden');
+        };
+
+        window.closeCategoryModal = function() {
+            document.getElementById('category-modal').classList.add('hidden');
+        };
+
+        window.filterByCategory = function(category) {
+            window.selectedCategoryFilter = category;
+            closeCategoryModal();
+            renderItems();
+            // Show toast or highlight filter if needed
+            if (category) {
+                document.getElementById('search-box').value = '';
+            }
+        };
+
         function getItemPhotos(item) {
             if (item.photos && Array.isArray(item.photos) && item.photos.length > 0) return item.photos;
             if (item.photo) return [item.photo];
@@ -363,10 +493,12 @@
                 <div class="space-y-2">
                     <p><strong>Store:</strong> ${item.storeName}</p>
                     <p><strong>Brand:</strong> ${item.brand}</p>
+                    <p><strong>Product Name:</strong> ${item.productName || item.brand}</p>
                     <p><strong>Category:</strong> ${item.category || '-'}</p>
                     <p><strong>Regular Price:</strong> ${regPrice}</p>
                     <p><strong>Promo Price:</strong> ${promoPrice}</p>
                     <p><strong>Package Size:</strong> ${unitText}</p>
+                    <p><strong>Note:</strong> ${item.note || '-'}</p>
                     <p><strong>Date:</strong> ${new Date(item.timestamp).toLocaleString()}</p>
                     <div><strong>${t.viewPhotos} (${photos.length}):</strong></div>
                     ${photosHtml}
@@ -489,11 +621,24 @@
             const items = window.surveyItems || [];
             const t = i18n[window.currentLang];
 
-            const filtered = items.filter(i => 
-                (i.storeName && i.storeName.toLowerCase().includes(keyword)) ||
-                (i.brand && i.brand.toLowerCase().includes(keyword)) ||
-                (i.category && i.category.toLowerCase().includes(keyword))
-            );
+            // Filter by search keyword and Category Tab filter
+            let filtered = items.filter(i => {
+                const matchKeyword = 
+                    (i.storeName && i.storeName.toLowerCase().includes(keyword)) ||
+                    (i.brand && i.brand.toLowerCase().includes(keyword)) ||
+                    (i.productName && i.productName.toLowerCase().includes(keyword)) ||
+                    (i.category && i.category.toLowerCase().includes(keyword));
+
+                const matchCategory = window.selectedCategoryFilter ? (i.category === window.selectedCategoryFilter) : true;
+                return matchKeyword && matchCategory;
+            });
+
+            // SORT ALPHABETICALLY BY PRODUCT NAME (or brand if product name missing)
+            filtered.sort((a, b) => {
+                const nameA = (a.productName || a.brand || '').toLowerCase();
+                const nameB = (b.productName || b.brand || '').toLowerCase();
+                return nameA.localeCompare(nameB, 'th');
+            });
 
             if (filtered.length === 0) {
                 listEl.innerHTML = `<div class="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-200">${t.noData}</div>`;
@@ -508,8 +653,12 @@
                 const photos = getItemPhotos(item);
                 const thumbImg = photos.length > 0 ? photos[0] : '';
                 const photoCount = photos.length;
+                const displayName = item.productName || item.brand;
+                const displayBrand = item.productName ? `${item.brand}` : '';
 
-                return `
+                let activeFilterBanner = window.selectedCategoryFilter ? `<div class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg flex justify-between items-center mb-2"><span>📂 หมวดหมู่: <b>${window.selectedCategoryFilter}</b></span><button onclick="filterByCategory(null)" class="text-red-500 font-bold">✕ ล้างตัวกรอง</button></div>` : '';
+
+                return (activeFilterBanner ? activeFilterBanner : '') + `
                     <div onclick="openDetail('${item.id}')" class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex gap-3 items-center cursor-pointer hover:border-blue-400 transition">
                         <div class="w-20 h-20 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden border relative">
                             ${thumbImg ? `<img src="${thumbImg}" class="w-full h-full object-cover">` : `<div class="flex items-center justify-center h-full text-xs text-slate-400">${t.noPhoto}</div>`}
@@ -517,7 +666,7 @@
                         </div>
                         <div class="flex-grow min-w-0">
                             <div class="flex justify-between items-start">
-                                <h3 class="font-bold text-slate-800 truncate">${item.brand}</h3>
+                                <h3 class="font-bold text-slate-800 truncate">${displayName} ${displayBrand ? `<span class="text-xs font-normal text-slate-500">(${displayBrand})</span>` : ''}</h3>
                                 <button type="button" onclick="event.stopPropagation(); deleteItemFromCloud('${item.id}')" class="text-slate-300 hover:text-red-500 text-xs px-1">🗑️</button>
                             </div>
                             <p class="text-xs text-slate-500 truncate">📍 ${item.storeName} | ${item.category || '-'}</p>
@@ -540,10 +689,10 @@
                 alert("No data to export");
                 return;
             }
-            let csvContent = "\uFEFFStore,Brand,Category,Regular Price (Rp),Promo Price (Rp),Package Size,Unit,Photos Count,Timestamp\n";
+            let csvContent = "\uFEFFStore,Brand,Product Name,Category,Regular Price (Rp),Promo Price (Rp),Package Size,Unit,Note,Photos Count,Timestamp\n";
             items.forEach(i => {
                 const photos = getItemPhotos(i);
-                csvContent += `"${i.storeName}","${i.brand}","${i.category || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${photos.length}","${i.timestamp}"\n`;
+                csvContent += `"${i.storeName}","${i.brand}","${i.productName || ''}","${i.category || ''}","${i.regularPrice || ''}","${i.promoPrice || ''}","${i.packageSize || ''}","${i.packageUnit || ''}","${i.note || ''}","${photos.length}","${i.timestamp}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -605,11 +754,13 @@
             const item = {
                 storeName: document.getElementById('storeName').value,
                 brand: document.getElementById('brand').value,
+                productName: document.getElementById('productName').value,
                 category: finalCategory,
                 regularPrice: document.getElementById('regularPriceInput').value,
                 promoPrice: document.getElementById('promoPriceInput').value,
                 packageSize: document.getElementById('packageSize').value,
                 packageUnit: finalUnit,
+                note: document.getElementById('itemNote').value,
                 photos: window.currentPhotos || [],
                 timestamp: new Date().toISOString()
             };
