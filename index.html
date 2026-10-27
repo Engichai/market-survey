@@ -81,7 +81,7 @@
             <span class="text-[10px] font-bold">Home</span>
         </button>
         <button onclick="openCategoryModal()" class="flex flex-col items-center text-slate-400 hover:text-slate-600 gap-1 transition">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2v0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             <span class="text-[10px] font-medium" id="nav-cat">Category</span>
         </button>
         <div class="relative -top-5">
@@ -351,7 +351,7 @@
                 deleteConfirm: "ต้องการลบรายการนี้?",
                 viewPhotos: "รูปภาพทั้งหมด (คลิกเพื่อขยาย)",
                 catModalTitle: "หมวดหมู่ทั้งหมด",
-                allCategories: "ทั้งหมด (All Items)",
+                allCategories: "📁 ทั้งหมด (All Items)",
                 itemsCount: "รายการ",
                 compareTitle: "เปรียบเทียบสินค้า",
                 compareBtn: "เปรียบเทียบ",
@@ -392,7 +392,7 @@
                 deleteConfirm: "Delete this item?",
                 viewPhotos: "All Photos (Click to zoom)",
                 catModalTitle: "All Categories",
-                allCategories: "All Items",
+                allCategories: "📁 All Items",
                 itemsCount: "items",
                 compareTitle: "Product Comparison",
                 compareBtn: "Compare",
@@ -433,7 +433,7 @@
                 deleteConfirm: "Hapus item ini?",
                 viewPhotos: "Semua Foto (Klik untuk zoom)",
                 catModalTitle: "Semua Kategori",
-                allCategories: "Semua Item",
+                allCategories: "📁 Semua Item",
                 itemsCount: "item",
                 compareTitle: "Perbandingan Produk",
                 compareBtn: "Bandingkan",
@@ -503,10 +503,10 @@
 
         window.openSettings = function() {
             const config = JSON.parse(localStorage.getItem('fb_config') || '{}');
-            document.getElementById('cfg-apiKey').value = config.apiKey || 'AIzaSyDBH18QRTobEg-G4iIVJPAMpcBVhkKeidY';
-            document.getElementById('cfg-authDomain').value = config.authDomain || 'market-survey-app-ad41c.firebaseapp.com';
-            document.getElementById('cfg-projectId').value = config.projectId || 'market-survey-app-ad41c';
-            document.getElementById('cfg-appId').value = config.appId || '1:313606973590:web:6dd2d6682a01799d30fab7';
+            document.getElementById('cfg-apiKey').value = config.apiKey || '';
+            document.getElementById('cfg-authDomain').value = config.authDomain || '';
+            document.getElementById('cfg-projectId').value = config.projectId || '';
+            document.getElementById('cfg-appId').value = config.appId || '';
             document.getElementById('settings-modal').classList.remove('hidden');
         };
 
@@ -990,7 +990,22 @@
         };
 
         function initFirebase() {
-            const config = JSON.parse(localStorage.getItem('fb_config') || '{}');
+            // ฝังค่า Firebase Config ตั้งต้นตรงนี้ ผู้ใช้ใหม่ไม่ต้องกรอกเอง!
+            const defaultConfig = {
+                apiKey: "AIzaSyDBH18QRTobEg-G4iIVJPAMpcBVhkKeidY",
+                authDomain: "market-survey-app-ad41c.firebaseapp.com",
+                projectId: "market-survey-app-ad41c",
+                appId: "1:313606973590:web:6dd2d6682a01799d30fab7"
+            };
+
+            const savedConfig = JSON.parse(localStorage.getItem('fb_config') || 'null');
+            const config = (savedConfig && savedConfig.apiKey) ? savedConfig : defaultConfig;
+
+            // บันทึกค่าตั้งต้นลง localStorage อัตโนมัติถ้ายังไม่มี
+            if (!savedConfig || !savedConfig.apiKey) {
+                localStorage.setItem('fb_config', JSON.stringify(defaultConfig));
+            }
+
             if (config.apiKey && config.projectId) {
                 try {
                     const app = initializeApp(config);
